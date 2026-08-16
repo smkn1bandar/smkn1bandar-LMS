@@ -307,30 +307,45 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
           {/* Quick Select from Registered Teachers & Users from Spreadsheet */}
           <div className="pt-2 border-t border-slate-100 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                PILIH CEPAT AKUN {activeRole} TERDAFTAR SPREADSHEET:
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                AKUN {activeRole} TERDAFTAR SPREADSHEET ({roleUsers.length}):
               </span>
-              <span className="text-[10px] text-sky-600 font-semibold">
-                {roleUsers.length} Akun
-              </span>
+              <button
+                type="button"
+                id="btn-refresh-users-list"
+                onClick={() => {
+                  db.initDatabase(true);
+                  setRegisteredUsers(db.getUsers());
+                  setSuccessMessage('Data akun guru & siswa diperbarui!');
+                  setTimeout(() => setSuccessMessage(null), 2500);
+                }}
+                className="text-[10px] text-sky-600 hover:text-sky-800 font-semibold underline"
+              >
+                Muat Ulang Data
+              </button>
             </div>
 
             {roleUsers.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1">
-                {roleUsers.slice(0, 4).map((u) => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-48 overflow-y-auto pr-1">
+                {roleUsers.map((u) => (
                   <button
                     key={u.id_user}
                     type="button"
                     id={`btn-select-user-${u.id_user}`}
                     onClick={() => handleSelectUserAccount(u)}
-                    className="p-2 rounded-xl bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-300 text-left transition-all group"
+                    className="p-2 rounded-xl bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-300 text-left transition-all group flex items-center justify-between"
                   >
-                    <p className="text-[11px] font-bold text-slate-800 group-hover:text-sky-800 line-clamp-1">
-                      {u.nama}
-                    </p>
-                    <p className="text-[9.5px] text-slate-500 font-mono line-clamp-1">
-                      User: <strong className="text-slate-700">{u.username || u.email.split('@')[0]}</strong>
-                    </p>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[11px] font-bold text-slate-800 group-hover:text-sky-800 truncate">
+                        {u.nama}
+                      </p>
+                      <p className="text-[9.5px] text-slate-500 font-mono truncate">
+                        User: <strong className="text-slate-700">{u.username || u.email.split('@')[0]}</strong>
+                      </p>
+                    </div>
+                    <span className="text-[9px] font-bold text-sky-600 px-1.5 py-0.5 rounded bg-sky-100 shrink-0 ml-1">
+                      Pilih
+                    </span>
                   </button>
                 ))}
               </div>

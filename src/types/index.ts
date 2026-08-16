@@ -1,4 +1,4 @@
-export type UserRole = 'ADMIN' | 'GURU' | 'PUBLIC';
+export type UserRole = 'ADMIN' | 'GURU' | 'SISWA' | 'PUBLIC';
 
 export type UserStatus = 'AKTIF' | 'NONAKTIF' | 'PENDING';
 
@@ -7,7 +7,7 @@ export interface User {
   email: string;
   nama: string;
   nip: string;
-  role: 'ADMIN' | 'GURU';
+  role: 'ADMIN' | 'GURU' | 'SISWA';
   mata_pelajaran: string;
   sekolah: string;
   foto: string;
@@ -159,6 +159,7 @@ export interface AppSettings {
 
 export type AppView = 
   | 'home'
+  | 'portal-login'
   | 'materi'
   | 'video'
   | 'karya'

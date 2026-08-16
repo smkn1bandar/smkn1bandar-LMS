@@ -25,7 +25,7 @@ export function getDrivePreviewUrl(fileIdOrUrl: string): string {
 }
 
 export const INITIAL_SETTINGS: AppSettings = {
-  school_name: 'SMK Negeri 1 Digital Edukasi',
+  school_name: 'SMK Negeri 1 Bandar',
   app_name: 'DIGITAL LMS GURU',
   tagline: 'Berbagi Pengetahuan, Berkarya, dan Menginspirasi Pembelajaran',
   logo_url: 'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=120&auto=format&fit=crop&q=80',
@@ -34,11 +34,11 @@ export const INITIAL_SETTINGS: AppSettings = {
   academic_year: '2025/2026',
   blogger_url: 'https://digital-lms-guru.blogspot.com',
   drive_master_folder: '1A2b3C4d5E6f_DigitalLMS_Master',
-  admin_email: 'rudi.harto63@admin.smk.belajar.id',
-  app_desc: 'Pusat pembelajaran digital dan repositori karya guru SMA/MA/SMK berbasis Google Workspace, Google Drive, YouTube, dan Google Apps Script.',
-  school_contact: '+62 812-3456-7890 | info@smkn1digital.sch.id',
-  school_address: 'Jl. Pendidikan Merdeka No. 45, Jakarta Pusat',
-  footer_text: '© 2026 Digital LMS Guru. Dikembangkan dengan Google Apps Script & Google Sheets untuk Komunitas Guru Indonesia.',
+  admin_email: 'info@smknegeri1bandar.sch.id',
+  app_desc: 'Pusat pembelajaran digital dan repositori karya guru SMK Negeri 1 Bandar berbasis Google Workspace, Google Drive, YouTube, dan Google Apps Script.',
+  school_contact: '+62 812-3456-7890 | info@smknegeri1bandar.sch.id',
+  school_address: 'Jl. Sudirman Perdagangan III',
+  footer_text: '© 2026 SMK Negeri 1 Bandar - Digital LMS Guru. Dikembangkan dengan Google Apps Script & Google Sheets.',
   allow_public_view: true,
 };
 
@@ -50,7 +50,7 @@ export const INITIAL_USERS: User[] = [
     nip: '19740512 199903 1 004',
     role: 'ADMIN',
     mata_pelajaran: 'Teknologi Informasi & Komunikasi',
-    sekolah: 'SMK Negeri 1 Digital Edukasi',
+    sekolah: 'SMK Negeri 1 Bandar',
     foto: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&auto=format&fit=crop&q=80',
     status: 'AKTIF',
     tanggal_daftar: '2025-07-10',
@@ -63,7 +63,7 @@ export const INITIAL_USERS: User[] = [
     nip: '19830214 200801 1 012',
     role: 'GURU',
     mata_pelajaran: 'Informatika & Rekayasa Perangkat Lunak',
-    sekolah: 'SMK Negeri 1 Digital Edukasi',
+    sekolah: 'SMK Negeri 1 Bandar',
     foto: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
     status: 'AKTIF',
     tanggal_daftar: '2025-07-12',
@@ -76,7 +76,7 @@ export const INITIAL_USERS: User[] = [
     nip: '19870921 201101 2 008',
     role: 'GURU',
     mata_pelajaran: 'Matematika Terapan',
-    sekolah: 'SMK Negeri 1 Digital Edukasi',
+    sekolah: 'SMK Negeri 1 Bandar',
     foto: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80',
     status: 'AKTIF',
     tanggal_daftar: '2025-07-15',
@@ -89,7 +89,7 @@ export const INITIAL_USERS: User[] = [
     nip: '19900305 201503 1 007',
     role: 'GURU',
     mata_pelajaran: 'Teknik Komputer & Jaringan',
-    sekolah: 'SMK Negeri 1 Digital Edukasi',
+    sekolah: 'SMK Negeri 1 Bandar',
     foto: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80',
     status: 'AKTIF',
     tanggal_daftar: '2025-07-20',
@@ -102,7 +102,7 @@ export const INITIAL_USERS: User[] = [
     nip: '19851110 200902 2 005',
     role: 'GURU',
     mata_pelajaran: 'Fisika Terapan & IPAS',
-    sekolah: 'SMK Negeri 1 Digital Edukasi',
+    sekolah: 'SMK Negeri 1 Bandar',
     foto: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&auto=format&fit=crop&q=80',
     status: 'AKTIF',
     tanggal_daftar: '2025-08-01',
@@ -115,11 +115,50 @@ export const INITIAL_USERS: User[] = [
     nip: '19920418 201903 1 009',
     role: 'GURU',
     mata_pelajaran: 'Bahasa Indonesia & Literasi Digital',
-    sekolah: 'SMK Negeri 1 Digital Edukasi',
+    sekolah: 'SMK Negeri 1 Bandar',
     foto: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&auto=format&fit=crop&q=80',
     status: 'AKTIF',
     tanggal_daftar: '2025-08-05',
     last_login: '2026-08-13 09:30',
+  },
+  {
+    id_user: 'USR-007',
+    email: 'rian.pratama@siswa.smk.belajar.id',
+    nama: 'Rian Pratama',
+    nip: 'NISN: 0078129384',
+    role: 'SISWA',
+    mata_pelajaran: 'Kelas XI RPL 1 (Rekayasa Perangkat Lunak)',
+    sekolah: 'SMK Negeri 1 Bandar',
+    foto: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&auto=format&fit=crop&q=80',
+    status: 'AKTIF',
+    tanggal_daftar: '2025-07-18',
+    last_login: '2026-08-16 09:10',
+  },
+  {
+    id_user: 'USR-008',
+    email: 'alya.amanda@siswa.smk.belajar.id',
+    nama: 'Alya Amanda',
+    nip: 'NISN: 0089234120',
+    role: 'SISWA',
+    mata_pelajaran: 'Kelas XII TKJ 1 (Teknik Komputer & Jaringan)',
+    sekolah: 'SMK Negeri 1 Bandar',
+    foto: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&auto=format&fit=crop&q=80',
+    status: 'AKTIF',
+    tanggal_daftar: '2025-07-18',
+    last_login: '2026-08-15 15:40',
+  },
+  {
+    id_user: 'USR-009',
+    email: 'dimas.arya@siswa.smk.belajar.id',
+    nama: 'Dimas Arya',
+    nip: 'NISN: 0091124567',
+    role: 'SISWA',
+    mata_pelajaran: 'Kelas X RPL 1 (Dasar Pemrograman)',
+    sekolah: 'SMK Negeri 1 Bandar',
+    foto: 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=200&auto=format&fit=crop&q=80',
+    status: 'AKTIF',
+    tanggal_daftar: '2025-07-20',
+    last_login: '2026-08-14 13:25',
   }
 ];
 
@@ -613,7 +652,10 @@ class DatabaseService {
   }
 
   public initDatabase(forceReset = false): void {
-    if (forceReset || !localStorage.getItem(this.settingsKey)) {
+    const existingSettings = localStorage.getItem(this.settingsKey);
+    const shouldReset = forceReset || !existingSettings || existingSettings.includes('SMK Negeri 1 Digital Edukasi');
+
+    if (shouldReset) {
       localStorage.setItem(this.settingsKey, JSON.stringify(INITIAL_SETTINGS));
       localStorage.setItem(this.usersKey, JSON.stringify(INITIAL_USERS));
       localStorage.setItem(this.guruKey, JSON.stringify(INITIAL_GURU));

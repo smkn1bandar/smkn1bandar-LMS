@@ -30,6 +30,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   const navItems: { label: string; view: AppView; icon: React.ComponentType<{ className?: string }> }[] = [
+    { label: 'Portal Masuk', view: 'portal-login', icon: LogIn },
     { label: 'Dashboard', view: 'home', icon: GraduationCap },
     { label: 'Materi Saya', view: 'materi', icon: BookOpen },
     { label: 'Video Pembelajaran', view: 'video', icon: Video },
@@ -158,8 +159,13 @@ export const Header: React.FC<HeaderProps> = ({
                     <div className="text-[10px] font-semibold text-sky-600 flex items-center gap-1">
                       {currentUser.role === 'ADMIN' ? (
                         <>
-                          <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                          <span>Admin Portal</span>
+                          <ShieldCheck className="w-3 h-3 text-amber-600" />
+                          <span className="text-amber-600">Admin Portal</span>
+                        </>
+                      ) : currentUser.role === 'SISWA' ? (
+                        <>
+                          <Users className="w-3 h-3 text-emerald-600" />
+                          <span className="text-emerald-600">Siswa / Pelajar</span>
                         </>
                       ) : (
                         <>
@@ -184,8 +190,10 @@ export const Header: React.FC<HeaderProps> = ({
                       <p className="text-xs text-slate-500 truncate">{currentUser.email}</p>
                       <span className={`inline-block mt-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
                         currentUser.role === 'ADMIN' 
-                          ? 'bg-emerald-100 text-emerald-800' 
-                          : 'bg-sky-100 text-sky-800'
+                          ? 'bg-amber-100 text-amber-800' 
+                          : currentUser.role === 'SISWA'
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : 'bg-sky-100 text-sky-800'
                       }`}>
                         ROLE: {currentUser.role}
                       </span>
@@ -199,10 +207,22 @@ export const Header: React.FC<HeaderProps> = ({
                             onNavigate('admin-dashboard');
                             setUserDropdownOpen(false);
                           }}
-                          className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-sky-50 hover:text-sky-700 rounded-xl transition-colors"
+                          className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-amber-50 hover:text-amber-800 rounded-xl transition-colors"
                         >
-                          <LayoutDashboard className="w-4 h-4 text-sky-600" />
+                          <LayoutDashboard className="w-4 h-4 text-amber-600" />
                           Dashboard Administrator
+                        </button>
+                      ) : currentUser.role === 'SISWA' ? (
+                        <button
+                          id="dropdown-btn-siswa-dash"
+                          onClick={() => {
+                            onNavigate('materi');
+                            setUserDropdownOpen(false);
+                          }}
+                          className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-emerald-50 hover:text-emerald-800 rounded-xl transition-colors"
+                        >
+                          <BookOpen className="w-4 h-4 text-emerald-600" />
+                          Katalog Materi Belajar
                         </button>
                       ) : (
                         <button
@@ -226,7 +246,7 @@ export const Header: React.FC<HeaderProps> = ({
                         <Sparkles className="w-3 h-3 text-amber-500" />
                       </div>
                       <div className="space-y-1">
-                        {INITIAL_USERS.slice(0, 4).map((u) => (
+                        {INITIAL_USERS.slice(0, 6).map((u) => (
                           <button
                             key={u.id_user}
                             id={`btn-switch-user-${u.id_user}`}

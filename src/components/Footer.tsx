@@ -51,6 +51,16 @@ export const Footer: React.FC<FooterProps> = ({ settings, onNavigate }) => {
             <ul className="space-y-2.5 text-xs">
               <li>
                 <button
+                  id="footer-link-portal-login"
+                  onClick={() => onNavigate('portal-login')}
+                  className="hover:text-white text-sky-400 font-semibold transition-colors flex items-center gap-1.5"
+                >
+                  <span className="text-sky-500">&rsaquo;</span>
+                  Pintu Masuk Guru &amp; Siswa
+                </button>
+              </li>
+              <li>
+                <button
                   id="footer-link-materi"
                   onClick={() => onNavigate('materi')}
                   className="hover:text-white text-slate-400 transition-colors flex items-center gap-1.5"

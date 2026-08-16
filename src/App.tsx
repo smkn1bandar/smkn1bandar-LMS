@@ -20,6 +20,7 @@ import { AddKaryaModal } from './views/Forms/AddKaryaModal';
 
 // Views
 import { HomeView } from './views/HomeView';
+import { PortalLoginView } from './views/PortalLoginView';
 import { MateriView } from './views/MateriView';
 import { VideoView } from './views/VideoView';
 import { KaryaView } from './views/KaryaView';
@@ -318,6 +319,7 @@ export default function App() {
         currentUser={currentUser}
         onOpenLogin={() => setIsAuthOpen(true)}
         onLogout={handleLogout}
+        onSwitchUser={handleLogin}
         settings={settings}
       />
 
@@ -339,6 +341,16 @@ export default function App() {
             onSelectGuru={handleSelectGuru}
             onOpenLogin={() => setIsAuthOpen(true)}
             stats={globalStats}
+          />
+        )}
+
+        {currentView === 'portal-login' && (
+          <PortalLoginView
+            settings={settings}
+            currentUser={currentUser}
+            onNavigate={handleNavigate}
+            onLogin={handleLogin}
+            onOpenAuthModal={() => setIsAuthOpen(true)}
           />
         )}
 

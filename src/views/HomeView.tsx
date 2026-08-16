@@ -84,6 +84,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
         {/* Action CTAs */}
         <div className="flex flex-wrap items-center gap-2.5 shrink-0">
           <button
+            id="btn-bento-portal-masuk"
+            onClick={() => onNavigate('portal-login')}
+            className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 shadow-xs transition-all active:scale-95"
+          >
+            <Users className="w-4 h-4 text-sky-400" />
+            <span>Portal Masuk Siswa &amp; Guru</span>
+          </button>
+          <button
             id="btn-bento-add-materi"
             onClick={() => onNavigate('materi')}
             className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 shadow-xs transition-all active:scale-95"
@@ -99,6 +107,75 @@ export const HomeView: React.FC<HomeViewProps> = ({
             <Award className="w-4 h-4 text-amber-500" />
             <span>Karya Guru</span>
           </button>
+        </div>
+      </section>
+
+      {/* QUICK ROLE PORTALS SHORTCUT CARDS */}
+      <section id="bento-quick-role-portals" className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Guru Portal Quick Card */}
+        <div 
+          onClick={() => onNavigate('portal-login')}
+          className="bg-gradient-to-br from-sky-50 to-white p-4 sm:p-5 rounded-2xl border border-sky-200 shadow-2xs hover:shadow-md hover:border-sky-400 transition-all cursor-pointer flex items-center justify-between group"
+        >
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-sm shadow-sky-600/30 group-hover:scale-105 transition-transform">
+              <GraduationCap className="w-6 h-6" />
+            </div>
+            <div>
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-sky-700 bg-sky-100/80 px-2 py-0.5 rounded">
+                Portal Guru
+              </span>
+              <h3 className="text-sm font-bold text-slate-900 mt-1 group-hover:text-sky-700 transition-colors">
+                Ruang Pendidik &amp; Pengajar
+              </h3>
+              <p className="text-[11px] text-slate-500">Upload modul Drive, video &amp; LKPD</p>
+            </div>
+          </div>
+          <ChevronRight className="w-4 h-4 text-sky-600 group-hover:translate-x-1 transition-transform" />
+        </div>
+
+        {/* Siswa Portal Quick Card */}
+        <div 
+          onClick={() => onNavigate('portal-login')}
+          className="bg-gradient-to-br from-emerald-50 to-white p-4 sm:p-5 rounded-2xl border border-emerald-200 shadow-2xs hover:shadow-md hover:border-emerald-400 transition-all cursor-pointer flex items-center justify-between group"
+        >
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-sm shadow-emerald-600/30 group-hover:scale-105 transition-transform">
+              <Users className="w-6 h-6" />
+            </div>
+            <div>
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded">
+                Portal Siswa
+              </span>
+              <h3 className="text-sm font-bold text-slate-900 mt-1 group-hover:text-emerald-700 transition-colors">
+                Ruang Belajar Peserta Didik
+              </h3>
+              <p className="text-[11px] text-slate-500">Akses modul, video &amp; tugas kelas</p>
+            </div>
+          </div>
+          <ChevronRight className="w-4 h-4 text-emerald-600 group-hover:translate-x-1 transition-transform" />
+        </div>
+
+        {/* Admin Portal Quick Card */}
+        <div 
+          onClick={() => onNavigate('portal-login')}
+          className="bg-gradient-to-br from-slate-100 to-white p-4 sm:p-5 rounded-2xl border border-slate-300 shadow-2xs hover:shadow-md hover:border-slate-500 transition-all cursor-pointer flex items-center justify-between group"
+        >
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-sm shadow-slate-900/30 group-hover:scale-105 transition-transform">
+              <ShieldCheck className="w-6 h-6 text-amber-400" />
+            </div>
+            <div>
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-800 bg-slate-200 px-2 py-0.5 rounded">
+                Portal Admin
+              </span>
+              <h3 className="text-sm font-bold text-slate-900 mt-1 group-hover:text-slate-900 transition-colors">
+                Control Panel Sekolah
+              </h3>
+              <p className="text-[11px] text-slate-500">Verifikasi karya, database &amp; GAS</p>
+            </div>
+          </div>
+          <ChevronRight className="w-4 h-4 text-slate-700 group-hover:translate-x-1 transition-transform" />
         </div>
       </section>
 

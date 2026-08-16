@@ -1,6 +1,6 @@
 {
-  "name": "Digital LMS Guru",
-  "description": "Platform Pembelajaran Digital untuk Guru SMA/MA/SMK berbasis Google Apps Script, Google Sheets, Google Drive, dan YouTube.",
+  "name": "SMK Negeri 1 Bandar - Digital LMS",
+  "description": "Platform Pembelajaran Digital SMK Negeri 1 Bandar berbasis Google Apps Script, Google Sheets, Google Drive, dan YouTube.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

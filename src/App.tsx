@@ -85,8 +85,8 @@ export default function App() {
   });
 
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
-    const id = Date.now().toString();
-    setToasts(prev => [...prev, { id, message, type }]);
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    setToasts(prev => [...prev.slice(-4), { id, message, type }]);
   };
 
   const removeToast = (id: string) => {

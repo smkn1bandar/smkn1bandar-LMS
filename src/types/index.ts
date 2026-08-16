@@ -157,6 +157,9 @@ export interface AppSettings {
   school_address: string;
   footer_text: string;
   allow_public_view: boolean;
+  gas_webapp_url?: string;
+  spreadsheet_id?: string;
+  drive_folder_id?: string;
 }
 
 export type AppView = 

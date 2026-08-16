@@ -634,11 +634,52 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
       {activeTab === 'pengaturan' && (
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-2xs max-w-3xl space-y-6">
           <div>
-            <h2 className="text-base font-bold text-slate-900">Pengaturan Portal &amp; Konfigurasi Google Apps Script</h2>
-            <p className="text-xs text-slate-500">Sesuaikan identitas sekolah dan ID Google Drive / Sheets.</p>
+            <h2 className="text-base font-bold text-slate-900">Pengaturan Portal &amp; Integrasi Google Apps Script</h2>
+            <p className="text-xs text-slate-500">Hubungkan Web App Google Apps Script dan Google Spreadsheet Database ke LMS ini.</p>
+          </div>
+
+          {/* Quick Guide Card */}
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-sky-50 to-indigo-50 border border-sky-200/80 text-xs text-slate-700 space-y-2.5">
+            <div className="flex items-center gap-2 font-bold text-sky-950">
+              <Sparkles className="w-4 h-4 text-sky-600" />
+              <span>Panduan Menghubungkan Google Apps Script ke Spreadsheet</span>
+            </div>
+            <ol className="list-decimal list-inside space-y-1.5 text-slate-600 leading-relaxed text-[11.5px]">
+              <li>
+                <strong>Di Editor Google Apps Script:</strong> Pilih fungsi <code className="bg-white px-1.5 py-0.5 rounded text-sky-800 font-mono font-bold border border-sky-200">setupApplication</code> (seperti pada dropdown di toolbar atas) lalu klik tombol <strong>▶ Jalankan (Run)</strong>. Ini akan otomatis membuat Google Spreadsheet baru beserta seluruh sheet (*USERS, GURU, KELAS, MATERI, YOUTUBE, KARYA_GURU*).
+              </li>
+              <li>
+                <strong>Atau Secara Manual:</strong> Di Google Apps Script &gt; klik ikon <strong>⚙ Project Settings</strong> (Roda Gigi di menu kiri) &gt; bagian <em>Script Properties</em> &gt; Tambah properti <code className="bg-white px-1.5 py-0.5 rounded text-sky-800 font-mono font-bold border border-sky-200">DIGITAL_LMS_SPREADSHEET_ID</code> dan isi nilainya dengan ID Google Spreadsheet Anda.
+              </li>
+              <li>
+                <strong>Di Form Bawah Ini:</strong> Masukkan URL Web App hasil deploy Anda agar aplikasi frontend dapat berinteraksi secara real-time.
+              </li>
+            </ol>
           </div>
 
           <form onSubmit={handleSaveSettings} className="space-y-4">
+            {/* GAS Web App URL */}
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-bold text-slate-800">
+                  URL Google Apps Script Web App (Deploy Executable) *
+                </label>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                  Aktif &amp; Terhubung
+                </span>
+              </div>
+              <input
+                type="url"
+                value={tempSettings.gas_webapp_url || ''}
+                onChange={(e) => setTempSettings({ ...tempSettings, gas_webapp_url: e.target.value })}
+                placeholder="https://script.google.com/macros/s/.../exec"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-mono text-slate-900 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+              <p className="text-[11px] text-slate-500">
+                URL eksekusi Web App dari dialog <em>Deploy &gt; Manage Deployments &gt; Web app URL</em>.
+              </p>
+            </div>
+
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">Nama Aplikasi LMS *</label>
               <input
@@ -671,7 +712,7 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Google Spreadsheet Database ID</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Google Spreadsheet Database ID / URL</label>
                 <input
                   type="text"
                   value={tempSettings.spreadsheet_id || ''}

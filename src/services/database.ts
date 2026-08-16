@@ -40,6 +40,9 @@ export const INITIAL_SETTINGS: AppSettings = {
   school_address: 'Jl. Sudirman Perdagangan III',
   footer_text: '© 2026 SMK Negeri 1 Bandar - Digital LMS Guru. Dikembangkan dengan Google Apps Script & Google Sheets.',
   allow_public_view: true,
+  gas_webapp_url: 'https://script.google.com/macros/s/AKfycbxKPqc5HpJU4T9KL4-9FZw51iLZqdPFZ5e2FoCdS6e15aSmlV9_eROCPA-dFDiPUnS7/exec',
+  spreadsheet_id: '',
+  drive_folder_id: '',
 };
 
 export const INITIAL_USERS: User[] = [

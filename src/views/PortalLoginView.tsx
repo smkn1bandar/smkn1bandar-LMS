@@ -26,9 +26,17 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
   // Active Role Tab: 'GURU' | 'SISWA' | 'ADMIN'
   const [activeRole, setActiveRole] = useState<'GURU' | 'SISWA' | 'ADMIN'>('GURU');
   
+  // Real users loaded from database/spreadsheet
+  const [registeredUsers, setRegisteredUsers] = useState<User[]>(() => db.getUsers());
+
+  // Refresh users on load
+  const refreshUsersList = () => {
+    setRegisteredUsers(db.getUsers());
+  };
+
   // Form State
-  const [username, setUsername] = useState('guru');
-  const [password, setPassword] = useState('guru');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -44,17 +52,12 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
     setActiveRole(role);
     setErrorMessage(null);
     setSuccessMessage(null);
-    if (role === 'GURU') {
-      setUsername('guru');
-      setPassword('guru');
-    } else if (role === 'SISWA') {
-      setUsername('siswa');
-      setPassword('siswa');
-    } else {
-      setUsername('admin');
-      setPassword('admin');
-    }
+    setUsername('');
+    setPassword('');
   };
+
+  // Filter registered users by active role
+  const roleUsers = registeredUsers.filter(u => u.role === activeRole && u.status === 'AKTIF');
 
   // Submit Login
   const handleSubmitLogin = (e: React.FormEvent) => {
@@ -86,11 +89,11 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
     }, 250);
   };
 
-  // Quick Preset Helper
-  const handleQuickFill = (userRole: 'GURU' | 'SISWA' | 'ADMIN', userUser: string, userPass: string) => {
-    setActiveRole(userRole);
-    setUsername(userUser);
-    setPassword(userPass);
+  // Quick select registered teacher/user helper
+  const handleSelectUserAccount = (selectedUser: User) => {
+    setActiveRole(selectedUser.role as 'GURU' | 'SISWA' | 'ADMIN');
+    setUsername(selectedUser.username || selectedUser.email);
+    setPassword(selectedUser.password || (selectedUser.role === 'ADMIN' ? 'admin' : selectedUser.role === 'GURU' ? 'guru123' : 'siswa123'));
     setErrorMessage(null);
     setSuccessMessage(null);
   };
@@ -102,6 +105,7 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
 
     setTimeout(() => {
       db.initDatabase(true);
+      setRegisteredUsers(db.getUsers());
       setIsInitializing(false);
       setInitSuccess(true);
       setTimeout(() => {
@@ -238,7 +242,7 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
                 htmlFor="input-username" 
                 className="block text-xs font-semibold text-slate-500"
               >
-                Username
+                Username atau Email Akun Terdaftar
               </label>
               <input
                 id="input-username"
@@ -246,7 +250,7 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="admin / guru / siswa"
+                placeholder="Masukkan username atau email sesuai spreadsheet"
                 className="w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-900 text-base font-normal placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all bg-white"
               />
             </div>
@@ -266,7 +270,7 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder="Password akun Anda"
                   className="w-full pl-4 pr-11 py-3 rounded-xl border border-slate-300 text-slate-900 text-base font-normal placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all bg-white"
                 />
                 <button
@@ -300,46 +304,43 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
             </button>
           </form>
 
-          {/* Quick 1-Click Credentials Fill */}
+          {/* Quick Select from Registered Teachers & Users from Spreadsheet */}
           <div className="pt-2 border-t border-slate-100 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                1-Klik Akun Masuk (Demo)
+                PILIH CEPAT AKUN {activeRole} TERDAFTAR SPREADSHEET:
               </span>
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              <span className="text-[10px] text-sky-600 font-semibold">
+                {roleUsers.length} Akun
+              </span>
             </div>
 
-            <div className="grid grid-cols-3 gap-1.5">
-              <button
-                type="button"
-                id="btn-quick-fill-guru"
-                onClick={() => handleQuickFill('GURU', 'guru', 'guru')}
-                className="px-2 py-1.5 rounded-lg bg-sky-50 hover:bg-sky-100 border border-sky-200 text-left transition-colors"
-              >
-                <p className="text-[10px] font-extrabold text-sky-800">Guru</p>
-                <p className="text-[9px] text-sky-600 font-mono">guru / guru</p>
-              </button>
-
-              <button
-                type="button"
-                id="btn-quick-fill-siswa"
-                onClick={() => handleQuickFill('SISWA', 'siswa', 'siswa')}
-                className="px-2 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-left transition-colors"
-              >
-                <p className="text-[10px] font-extrabold text-emerald-800">Siswa</p>
-                <p className="text-[9px] text-emerald-600 font-mono">siswa / siswa</p>
-              </button>
-
-              <button
-                type="button"
-                id="btn-quick-fill-admin"
-                onClick={() => handleQuickFill('ADMIN', 'admin', 'admin')}
-                className="px-2 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-300 text-left transition-colors"
-              >
-                <p className="text-[10px] font-extrabold text-slate-800">Admin</p>
-                <p className="text-[9px] text-slate-600 font-mono">admin / admin</p>
-              </button>
-            </div>
+            {roleUsers.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1">
+                {roleUsers.slice(0, 4).map((u) => (
+                  <button
+                    key={u.id_user}
+                    type="button"
+                    id={`btn-select-user-${u.id_user}`}
+                    onClick={() => handleSelectUserAccount(u)}
+                    className="p-2 rounded-xl bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-300 text-left transition-all group"
+                  >
+                    <p className="text-[11px] font-bold text-slate-800 group-hover:text-sky-800 line-clamp-1">
+                      {u.nama}
+                    </p>
+                    <p className="text-[9.5px] text-slate-500 font-mono line-clamp-1">
+                      User: <strong className="text-slate-700">{u.username || u.email.split('@')[0]}</strong>
+                    </p>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="p-3 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                <p className="text-[11px] text-slate-500">
+                  Belum ada akun {activeRole.toLowerCase()} terdaftar di spreadsheet.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Secondary Actions */}

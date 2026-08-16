@@ -647,9 +647,9 @@ function setupApplication() {
     props.setProperty(SPREADSHEET_PROP_KEY, ss.getId());
   }
   
-  // Definisi Skema Tabel
+  // Definisi Skema Tabel Lengkap
   var schemas = {
-    USERS: ['ID_USER', 'EMAIL', 'NAMA', 'NIP', 'ROLE', 'MATA_PELAJARAN', 'SEKOLAH', 'FOTO', 'STATUS', 'TANGGAL_DAFTAR', 'LAST_LOGIN'],
+    USERS: ['ID_USER', 'USERNAME', 'PASSWORD', 'EMAIL', 'NAMA', 'NIP', 'ROLE', 'STATUS', 'MATA_PELAJARAN', 'SEKOLAH', 'FOTO', 'TANGGAL_DAFTAR', 'LAST_LOGIN'],
     GURU: ['ID_GURU', 'EMAIL', 'NAMA_GURU', 'NIP', 'GELAR', 'MATA_PELAJARAN', 'JURUSAN', 'KELAS', 'FOTO', 'BIOGRAFI', 'KEAHLIAN', 'KONTAK', 'STATUS'],
     KELAS: ['ID_KELAS', 'NAMA_KELAS', 'TINGKAT', 'JURUSAN', 'TAHUN_AJARAN', 'WALI_KELAS', 'STATUS'],
     MATERI: ['ID_MATERI', 'ID_GURU', 'NAMA_GURU', 'JUDUL', 'DESKRIPSI', 'MATA_PELAJARAN', 'KELAS', 'TOPIK', 'JENIS_MATERI', 'SUMBER', 'URL', 'FILE_ID', 'THUMBNAIL', 'TANGGAL_UPLOAD', 'STATUS', 'JUMLAH_VIEW'],
@@ -664,10 +664,46 @@ function setupApplication() {
     if (!sheet) {
       sheet = ss.insertSheet(sheetName);
     }
+    
+    var expectedCols = schemas[sheetName];
+    
+    // Jika sheet baru atau header belum ada / belum lengkap
     if (sheet.getLastRow() === 0) {
-      sheet.appendRow(schemas[sheetName]);
-      sheet.getRange(1, 1, 1, schemas[sheetName].length).setFontWeight('bold').setBackground('#2563eb').setFontColor('#ffffff');
+      sheet.appendRow(expectedCols);
+      sheet.getRange(1, 1, 1, expectedCols.length)
+        .setFontWeight('bold')
+        .setBackground('#1877F2')
+        .setFontColor('#ffffff');
+    } else {
+      // Perbarui header baris 1 agar selalu sesuai dengan skema terbaru
+      var currentHeaders = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), expectedCols.length)).getValues()[0];
+      var isHeaderMatching = true;
+      for (var c = 0; c < expectedCols.length; c++) {
+        if (currentHeaders[c] !== expectedCols[c]) {
+          isHeaderMatching = false;
+          break;
+        }
+      }
+      
+      if (!isHeaderMatching) {
+        // Tulis ulang header baris 1 dengan kolom lengkap
+        sheet.getRange(1, 1, 1, expectedCols.length).setValues([expectedCols])
+          .setFontWeight('bold')
+          .setBackground('#1877F2')
+          .setFontColor('#ffffff');
+      }
     }
+  }
+  
+  // Isi Akun Awal (Admin, Guru, Siswa) jika belum ada data di USERS
+  var userSheet = ss.getSheetByName('USERS');
+  if (userSheet && userSheet.getLastRow() <= 1) {
+    var initialUsers = [
+      ['USR-001', 'admin', 'admin', 'rudi.harto63@admin.smk.belajar.id', 'Drs. Rudi Hartono, M.T.', '19740512 199903 1 004', 'ADMIN', 'AKTIF', 'Teknologi Informasi', 'SMK Negeri 1 Bandar', '', '2026-01-01', ''],
+      ['USR-002', 'guru', 'guru', 'budi.santoso@guru.smk.belajar.id', 'Budi Santoso, S.Kom., M.Pd.', '19830214 200801 1 012', 'GURU', 'AKTIF', 'Informatika & Rekayasa Perangkat Lunak', 'SMK Negeri 1 Bandar', '', '2026-01-01', ''],
+      ['USR-003', 'siswa', 'siswa', 'rian.pratama@siswa.smk.belajar.id', 'Rian Pratama', 'NISN: 0078129384', 'SISWA', 'AKTIF', 'Siswa Kelas XI RPL 1', 'SMK Negeri 1 Bandar', '', '2026-01-01', '']
+    ];
+    userSheet.getRange(2, 1, initialUsers.length, initialUsers[0].length).setValues(initialUsers);
   }
   
   // Hapus sheet default "Sheet1" jika ada
@@ -676,7 +712,9 @@ function setupApplication() {
     ss.deleteSheet(defaultSheet);
   }
   
-  initializeFolders();
+  if (typeof initializeFolders === 'function') {
+    try { initializeFolders(); } catch(e) {}
+  }
   return ss;
 }
 

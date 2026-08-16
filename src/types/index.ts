@@ -4,6 +4,8 @@ export type UserStatus = 'AKTIF' | 'NONAKTIF' | 'PENDING';
 
 export interface User {
   id_user: string;
+  username?: string;
+  password?: string;
   email: string;
   nama: string;
   nip: string;

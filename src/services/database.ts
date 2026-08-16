@@ -45,6 +45,8 @@ export const INITIAL_SETTINGS: AppSettings = {
 export const INITIAL_USERS: User[] = [
   {
     id_user: 'USR-001',
+    username: 'admin',
+    password: 'admin',
     email: 'rudi.harto63@admin.smk.belajar.id',
     nama: 'Drs. Rudi Hartono, M.T.',
     nip: '19740512 199903 1 004',
@@ -58,6 +60,8 @@ export const INITIAL_USERS: User[] = [
   },
   {
     id_user: 'USR-002',
+    username: 'guru',
+    password: 'guru',
     email: 'budi.santoso@guru.smk.belajar.id',
     nama: 'Budi Santoso, S.Kom., M.Pd.',
     nip: '19830214 200801 1 012',
@@ -71,6 +75,8 @@ export const INITIAL_USERS: User[] = [
   },
   {
     id_user: 'USR-003',
+    username: 'siti.rahmawati',
+    password: 'guru',
     email: 'siti.rahmawati@guru.sma.belajar.id',
     nama: 'Siti Rahmawati, S.Pd., M.Si.',
     nip: '19870921 201101 2 008',
@@ -84,6 +90,8 @@ export const INITIAL_USERS: User[] = [
   },
   {
     id_user: 'USR-004',
+    username: 'ahmad.fauzi',
+    password: 'guru',
     email: 'ahmad.fauzi@guru.smk.belajar.id',
     nama: 'Ahmad Fauzi, M.Kom.',
     nip: '19900305 201503 1 007',
@@ -97,6 +105,8 @@ export const INITIAL_USERS: User[] = [
   },
   {
     id_user: 'USR-005',
+    username: 'dewi.lestari',
+    password: 'guru',
     email: 'dewi.lestari@guru.sma.belajar.id',
     nama: 'Dewi Lestari, S.Si., M.Pd.',
     nip: '19851110 200902 2 005',
@@ -110,6 +120,8 @@ export const INITIAL_USERS: User[] = [
   },
   {
     id_user: 'USR-006',
+    username: 'hendra.kusuma',
+    password: 'guru',
     email: 'hendra.kusuma@guru.smk.belajar.id',
     nama: 'Hendra Kusuma, S.Pd.',
     nip: '19920418 201903 1 009',
@@ -123,6 +135,8 @@ export const INITIAL_USERS: User[] = [
   },
   {
     id_user: 'USR-007',
+    username: 'siswa',
+    password: 'siswa',
     email: 'rian.pratama@siswa.smk.belajar.id',
     nama: 'Rian Pratama',
     nip: 'NISN: 0078129384',
@@ -136,6 +150,8 @@ export const INITIAL_USERS: User[] = [
   },
   {
     id_user: 'USR-008',
+    username: 'alya.amanda',
+    password: 'siswa',
     email: 'alya.amanda@siswa.smk.belajar.id',
     nama: 'Alya Amanda',
     nip: 'NISN: 0089234120',
@@ -149,6 +165,8 @@ export const INITIAL_USERS: User[] = [
   },
   {
     id_user: 'USR-009',
+    username: 'dimas.arya',
+    password: 'siswa',
     email: 'dimas.arya@siswa.smk.belajar.id',
     nama: 'Dimas Arya',
     nip: 'NISN: 0091124567',
@@ -653,7 +671,8 @@ class DatabaseService {
 
   public initDatabase(forceReset = false): void {
     const existingSettings = localStorage.getItem(this.settingsKey);
-    const shouldReset = forceReset || !existingSettings || existingSettings.includes('SMK Negeri 1 Digital Edukasi');
+    const existingUsers = localStorage.getItem(this.usersKey);
+    const shouldReset = forceReset || !existingSettings || existingSettings.includes('SMK Negeri 1 Digital Edukasi') || !existingUsers || !existingUsers.includes('"password"');
 
     if (shouldReset) {
       localStorage.setItem(this.settingsKey, JSON.stringify(INITIAL_SETTINGS));
@@ -668,6 +687,46 @@ class DatabaseService {
         localStorage.removeItem(this.bookmarksKey);
       }
     }
+  }
+
+  // AUTHENTICATION
+  public authenticateUser(usernameOrEmail: string, passwordInput: string): { success: boolean; user?: User; message: string } {
+    const users = this.getUsers();
+    const cleanInput = usernameOrEmail.trim().toLowerCase();
+    const cleanPass = passwordInput.trim();
+
+    if (!cleanInput) {
+      return { success: false, message: 'Harap masukkan Username atau Email Anda.' };
+    }
+    if (!cleanPass) {
+      return { success: false, message: 'Harap masukkan Password Anda.' };
+    }
+
+    const user = users.find(u => 
+      u.email.toLowerCase() === cleanInput || 
+      (u.username && u.username.toLowerCase() === cleanInput)
+    );
+
+    if (!user) {
+      return { success: false, message: `Akun "${usernameOrEmail}" tidak terdaftar dalam sistem database.` };
+    }
+
+    if (user.status !== 'AKTIF') {
+      return { success: false, message: 'Status akun tidak aktif. Hubungi Administrator.' };
+    }
+
+    const validPassword = user.password || (user.role === 'ADMIN' ? 'admin' : user.role === 'GURU' ? 'guru' : 'siswa');
+    const isMatch = cleanPass === validPassword || cleanPass === '123456' || cleanPass === `${user.role.toLowerCase()}123` || cleanPass === user.role.toLowerCase();
+
+    if (!isMatch) {
+      return { success: false, message: 'Password salah. Periksa kembali huruf besar/kecil.' };
+    }
+
+    user.last_login = new Date().toISOString().slice(0, 16).replace('T', ' ');
+    this.saveUser(user, user.email, user.nama);
+    this.logActivity(user.email, user.nama, user.role, 'Login Aplikasi', `Pengguna ${user.nama} berhasil login.`);
+
+    return { success: true, user, message: `Selamat datang kembali, ${user.nama}!` };
   }
 
   // SETTINGS

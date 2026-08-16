@@ -201,10 +201,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                           </span>
                         </div>
                         <p className="text-[11px] text-slate-500 truncate">{user.email}</p>
-                        <p className="text-[10px] text-slate-600 font-medium truncate flex items-center gap-1">
-                          <School className="w-3 h-3 text-slate-400 shrink-0" />
-                          {user.mata_pelajaran}
-                        </p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-[10px] text-slate-600 font-medium truncate flex items-center gap-1">
+                            <School className="w-3 h-3 text-slate-400 shrink-0" />
+                            {user.mata_pelajaran}
+                          </span>
+                          <span className="text-[9px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-mono">
+                            User: {user.username || user.role.toLowerCase()} | Pass: {user.password || user.role.toLowerCase()}
+                          </span>
+                        </div>
                       </div>
                     </div>
 

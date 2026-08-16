@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   GraduationCap, Users, ShieldCheck, ArrowRight, BookOpen, 
-  Video, Award, CheckCircle2, Sparkles, MapPin, Phone, Mail, 
-  Lock, UserCheck, HardDrive, KeyRound, ExternalLink, HelpCircle, 
-  School, Check, ChevronRight, LogIn, Database, Zap, Eye, EyeOff,
-  AlertCircle, RotateCw, FileSpreadsheet, Layers, ShieldAlert, CheckCircle
+  MapPin, Phone, Mail, School, Check, RotateCw, Database, Zap, 
+  Eye, EyeOff, AlertCircle, CheckCircle2, Sparkles, LogIn, 
+  ExternalLink, CheckCircle, Lock, KeyRound
 } from 'lucide-react';
 import { AppSettings, AppView, User } from '../types';
-import { INITIAL_USERS, db } from '../services/database';
+import { db } from '../services/database';
 
 interface PortalLoginViewProps {
   settings: AppSettings;
@@ -27,7 +26,7 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
   // Active Role Tab: 'GURU' | 'SISWA' | 'ADMIN'
   const [activeRole, setActiveRole] = useState<'GURU' | 'SISWA' | 'ADMIN'>('GURU');
   
-  // Credentials Form State
+  // Form State
   const [username, setUsername] = useState('guru');
   const [password, setPassword] = useState('guru');
   const [showPassword, setShowPassword] = useState(false);
@@ -40,7 +39,7 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
   const [isInitializing, setIsInitializing] = useState(false);
   const [initSuccess, setInitSuccess] = useState(false);
 
-  // Synchronize default credentials when role tab changes
+  // Handle Tab Switch
   const handleSelectRoleTab = (role: 'GURU' | 'SISWA' | 'ADMIN') => {
     setActiveRole(role);
     setErrorMessage(null);
@@ -57,7 +56,7 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
     }
   };
 
-  // Submit Login Form
+  // Submit Login
   const handleSubmitLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
@@ -68,10 +67,9 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
       const result = db.authenticateUser(username, password);
 
       if (result.success && result.user) {
-        setSuccessMessage(`Login Berhasil! Selamat datang, ${result.user.nama}`);
+        setSuccessMessage(`Login Berhasil! Mengalihkan...`);
         onLogin(result.user);
 
-        // Redirect based on role
         setTimeout(() => {
           if (result.user?.role === 'ADMIN') {
             onNavigate('admin-dashboard');
@@ -80,12 +78,12 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
           } else {
             onNavigate('materi');
           }
-        }, 600);
+        }, 500);
       } else {
-        setErrorMessage(result.message || 'Username atau password tidak sesuai.');
+        setErrorMessage(result.message || 'Username atau password salah.');
       }
       setIsLoading(false);
-    }, 300);
+    }, 250);
   };
 
   // Quick Preset Helper
@@ -97,7 +95,7 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
     setSuccessMessage(null);
   };
 
-  // Initialize / Reset Database Action
+  // Database Setup Action
   const handleRunDatabaseSetup = () => {
     setIsInitializing(true);
     setInitSuccess(false);
@@ -109,72 +107,76 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
       setTimeout(() => {
         setIsSetupModalOpen(false);
         setInitSuccess(false);
-      }, 1500);
-    }, 800);
+      }, 1400);
+    }, 700);
   };
 
   return (
-    <div id="portal-login-view" className="space-y-10 pb-20">
+    <div 
+      id="portal-landing-fullscreen" 
+      className="min-h-screen w-full bg-gradient-to-br from-slate-100 via-sky-50/50 to-slate-200 flex flex-col justify-between p-4 sm:p-6 lg:p-8 antialiased"
+    >
       
-      {/* 1. TOP HEADER & IDENTITY */}
-      <div className="text-center space-y-2 max-w-2xl mx-auto pt-2">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-extrabold uppercase tracking-wider bg-sky-100 text-sky-800 border border-sky-200">
-          <School className="w-4 h-4 text-sky-700" />
+      {/* 1. TOP HEADER BRANDING */}
+      <div className="w-full max-w-4xl mx-auto flex flex-col items-center text-center pt-2 sm:pt-4 space-y-2">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-white/90 text-sky-800 border border-sky-200/80 shadow-xs backdrop-blur-xs">
+          <School className="w-4 h-4 text-sky-600" />
           <span>{settings.school_name}</span>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+
+        <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
           Pusat Pembelajaran Digital &amp; LMS
         </h1>
-        <p className="text-xs sm:text-sm text-slate-500 max-w-lg mx-auto">
-          Portal autentikasi terpadu untuk Guru Pengajar, Siswa Peserta Didik, dan Administrator Sekolah.
+        <p className="text-xs sm:text-sm text-slate-600 max-w-md">
+          Portal Autentikasi Tunggal Pendidik Guru, Siswa Peserta Didik, dan Administrator
         </p>
       </div>
 
-      {/* 2. THE EXACT LOGIN CARD FROM SCREENSHOT (CENTRAL FORM) */}
-      <div className="max-w-md mx-auto w-full">
+      {/* 2. CENTRAL AUTHENTICATION CARD (MATCHING EXACT SCREENSHOT) */}
+      <div className="w-full max-w-md mx-auto my-4 sm:my-6">
         <div 
           id="main-login-card" 
-          className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xl shadow-slate-200/50 space-y-6 relative overflow-hidden"
+          className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-2xl shadow-slate-300/60 space-y-5 relative overflow-hidden"
         >
-          {/* Top Subtitle */}
+          {/* Subtitle Matching Reference */}
           <div className="text-center">
-            <span className="text-sm font-bold text-slate-700">
+            <span className="text-sm sm:text-base font-semibold text-slate-700">
               {activeRole === 'GURU' && 'Pembelajaran Guru'}
               {activeRole === 'SISWA' && 'Pembelajaran Siswa'}
-              {activeRole === 'ADMIN' && 'Administrator Panel'}
+              {activeRole === 'ADMIN' && 'Pembelajaran Guru & Admin'}
             </span>
           </div>
 
-          {/* Golden / Yellow Setup Database Button (Exact match from screenshot) */}
+          {/* Yellow Setup Database Button (Exact match from screenshot) */}
           <div className="space-y-1.5">
             <button
               type="button"
               id="btn-inisialisasi-database"
               onClick={() => setIsSetupModalOpen(true)}
-              className="w-full bg-[#FFC107] hover:bg-[#FFB300] text-slate-950 font-extrabold py-3.5 px-4 rounded-2xl shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2 text-sm sm:text-base border border-amber-400 active:scale-98"
+              className="w-full bg-[#FFC107] hover:bg-[#FFB300] text-slate-950 font-black py-3.5 px-4 rounded-xl shadow-xs hover:shadow-md transition-all flex items-center justify-center gap-2 text-sm sm:text-base border border-amber-400 active:scale-[0.98]"
             >
               <Database className="w-5 h-5 fill-slate-950 text-slate-950 shrink-0" />
-              <Zap className="w-4 h-4 fill-amber-700 text-amber-800 shrink-0" />
+              <Zap className="w-4 h-4 fill-amber-800 text-amber-800 shrink-0" />
               <span>Inisialisasi Database (Setup Database)</span>
             </button>
-            <p className="text-center text-[11px] text-slate-500">
+            <p className="text-center text-[11px] text-slate-500 font-normal">
               Klik jika sheet belum ada / ingin mengisi data awal.
             </p>
           </div>
 
-          {/* Role Switcher Tabs */}
+          {/* Role Switcher (Guru, Siswa, Admin) */}
           <div className="space-y-1.5 pt-1">
-            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center">
-              Pilih Peran Akun Masuk
+            <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">
+              PILIH PERAN AKUN MASUK
             </label>
-            <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 rounded-2xl border border-slate-200">
+            <div className="grid grid-cols-3 gap-1 p-1 bg-slate-100 rounded-xl border border-slate-200">
               <button
                 type="button"
                 id="tab-role-guru"
                 onClick={() => handleSelectRoleTab('GURU')}
-                className={`py-2 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                className={`py-2 px-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
                   activeRole === 'GURU'
-                    ? 'bg-sky-600 text-white shadow-sm'
+                    ? 'bg-[#1877F2] text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                 }`}
               >
@@ -186,9 +188,9 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
                 type="button"
                 id="tab-role-siswa"
                 onClick={() => handleSelectRoleTab('SISWA')}
-                className={`py-2 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                className={`py-2 px-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
                   activeRole === 'SISWA'
-                    ? 'bg-emerald-600 text-white shadow-sm'
+                    ? 'bg-emerald-600 text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                 }`}
               >
@@ -200,9 +202,9 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
                 type="button"
                 id="tab-role-admin"
                 onClick={() => handleSelectRoleTab('ADMIN')}
-                className={`py-2 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                className={`py-2 px-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
                   activeRole === 'ADMIN'
-                    ? 'bg-slate-900 text-white shadow-sm'
+                    ? 'bg-slate-900 text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                 }`}
               >
@@ -212,25 +214,25 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
             </div>
           </div>
 
-          {/* Form Fields for Username and Password */}
-          <form onSubmit={handleSubmitLogin} className="space-y-4 pt-1">
-            {/* Error Message Banner */}
+          {/* Form Username and Password */}
+          <form onSubmit={handleSubmitLogin} className="space-y-4">
+            {/* Error Message */}
             {errorMessage && (
               <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2 animate-in fade-in">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span className="font-medium">{errorMessage}</span>
+                <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                <span className="font-semibold">{errorMessage}</span>
               </div>
             )}
 
-            {/* Success Message Banner */}
+            {/* Success Message */}
             {successMessage && (
-              <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2 animate-in fade-in">
-                <CheckCircle2 className="w-4 h-4 shrink-0" />
+              <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 animate-in fade-in">
+                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
                 <span className="font-bold">{successMessage}</span>
               </div>
             )}
 
-            {/* Username Input Box (Exact style from screenshot) */}
+            {/* Username Field */}
             <div className="space-y-1">
               <label 
                 htmlFor="input-username" 
@@ -238,20 +240,18 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
               >
                 Username
               </label>
-              <div className="relative">
-                <input
-                  id="input-username"
-                  type="text"
-                  required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="admin / guru / siswa"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-900 text-base font-normal placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all bg-white"
-                />
-              </div>
+              <input
+                id="input-username"
+                type="text"
+                required
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="admin / guru / siswa"
+                className="w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-900 text-base font-normal placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all bg-white"
+              />
             </div>
 
-            {/* Password Input Box (Exact style from screenshot with password dots) */}
+            {/* Password Field */}
             <div className="space-y-1">
               <label 
                 htmlFor="input-password" 
@@ -284,12 +284,12 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
               </div>
             </div>
 
-            {/* Prominent Blue Button (Exact style from screenshot: "MASUK KE APLIKASI") */}
+            {/* Big Blue Submit Button ("MASUK KE APLIKASI") */}
             <button
               type="submit"
               id="btn-masuk-aplikasi"
               disabled={isLoading}
-              className="w-full bg-[#1877F2] hover:bg-[#1565C0] text-white font-extrabold py-3.5 px-4 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm sm:text-base tracking-wide uppercase active:scale-98 disabled:opacity-75 disabled:cursor-not-allowed"
+              className="w-full bg-[#1877F2] hover:bg-[#1565C0] text-white font-black py-3.5 px-4 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 text-sm sm:text-base tracking-wide uppercase active:scale-[0.98] disabled:opacity-75"
             >
               {isLoading ? (
                 <RotateCw className="w-5 h-5 animate-spin" />
@@ -300,11 +300,11 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
             </button>
           </form>
 
-          {/* Quick Demo Fill Presets */}
+          {/* Quick 1-Click Credentials Fill */}
           <div className="pt-2 border-t border-slate-100 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                Akun Demo Cepat (1-Klik Isi)
+                1-Klik Akun Masuk (Demo)
               </span>
               <Sparkles className="w-3.5 h-3.5 text-amber-500" />
             </div>
@@ -316,7 +316,7 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
                 onClick={() => handleQuickFill('GURU', 'guru', 'guru')}
                 className="px-2 py-1.5 rounded-lg bg-sky-50 hover:bg-sky-100 border border-sky-200 text-left transition-colors"
               >
-                <p className="text-[10px] font-bold text-sky-800">Guru</p>
+                <p className="text-[10px] font-extrabold text-sky-800">Guru</p>
                 <p className="text-[9px] text-sky-600 font-mono">guru / guru</p>
               </button>
 
@@ -326,7 +326,7 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
                 onClick={() => handleQuickFill('SISWA', 'siswa', 'siswa')}
                 className="px-2 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-left transition-colors"
               >
-                <p className="text-[10px] font-bold text-emerald-800">Siswa</p>
+                <p className="text-[10px] font-extrabold text-emerald-800">Siswa</p>
                 <p className="text-[9px] text-emerald-600 font-mono">siswa / siswa</p>
               </button>
 
@@ -336,211 +336,64 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
                 onClick={() => handleQuickFill('ADMIN', 'admin', 'admin')}
                 className="px-2 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-300 text-left transition-colors"
               >
-                <p className="text-[10px] font-bold text-slate-800">Admin</p>
+                <p className="text-[10px] font-extrabold text-slate-800">Admin</p>
                 <p className="text-[9px] text-slate-600 font-mono">admin / admin</p>
               </button>
             </div>
           </div>
 
-          {/* Google SSO Fallback */}
-          <div className="pt-2 text-center">
+          {/* Secondary Actions */}
+          <div className="pt-2 flex flex-col items-center gap-2 border-t border-slate-100">
             <button
               type="button"
               id="btn-portal-open-google-sso"
               onClick={onOpenAuthModal}
               className="text-xs text-sky-700 hover:text-sky-900 font-bold inline-flex items-center gap-1.5"
             >
-              <Mail className="w-3.5 h-3.5" />
-              <span>Atau masuk dengan Akun Google Belajar.id &rarr;</span>
+              <Mail className="w-3.5 h-3.5 text-sky-600" />
+              <span>Masuk dengan Google Belajar.id &rarr;</span>
+            </button>
+
+            <button
+              type="button"
+              id="btn-explore-public-home"
+              onClick={() => onNavigate('home')}
+              className="text-[11px] text-slate-500 hover:text-slate-800 font-medium inline-flex items-center gap-1 transition-colors"
+            >
+              <BookOpen className="w-3 h-3 text-slate-400" />
+              <span>Jelajahi Beranda Publik &amp; Modul Ajar Tanpa Login &rarr;</span>
             </button>
           </div>
+
         </div>
       </div>
 
-      {/* 3. BENTO THREE ROLE FEATURE CARDS */}
-      <section id="bento-three-portals" className="space-y-4 pt-4">
-        <div className="text-center space-y-1">
-          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-            Akses Fitur Berdasarkan Peran Pengguna
-          </h2>
-          <p className="text-xs text-slate-500">
-            Hak akses dan kapabilitas modul pembelajaran terintegrasi {settings.school_name}
-          </p>
+      {/* 3. BOTTOM FOOTER WITH SCHOOL DETAILS */}
+      <div className="w-full max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between text-[11px] sm:text-xs text-slate-500 pt-3 pb-1 border-t border-slate-200/70 gap-2">
+        <div className="flex items-center gap-2">
+          <School className="w-3.5 h-3.5 text-slate-400" />
+          <span className="font-semibold text-slate-700">{settings.school_name}</span>
+          <span>&bull;</span>
+          <span>{settings.school_address}</span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          
-          {/* GURU CARD */}
-          <div className="bg-white rounded-3xl p-6 border border-sky-100 hover:border-sky-300 shadow-xs hover:shadow-md transition-all space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-sky-50 text-sky-700 border border-sky-200">
-                <GraduationCap className="w-3.5 h-3.5" />
-                ROLE: GURU
-              </span>
-              <span className="text-[10px] font-bold text-sky-600 bg-sky-100 px-2 py-0.5 rounded">
-                Pendidik
-              </span>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-bold text-slate-900">Ruang Pendidik &amp; Guru</h3>
-              <p className="text-xs text-slate-500 mt-1">
-                Upload materi PDF/Drive, publikasi video praktikum YouTube, dan kirim karya inovasi guru.
-              </p>
-            </div>
-
-            <div className="space-y-2 pt-2 border-t border-slate-100 text-xs">
-              <div className="flex items-center gap-2 text-slate-700">
-                <CheckCircle2 className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-                <span>Upload Modul Ajar (Drive, PDF, PPTX)</span>
-              </div>
-              <div className="flex items-center gap-2 text-slate-700">
-                <CheckCircle2 className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-                <span>Streaming Video Tutorial YouTube</span>
-              </div>
-              <div className="flex items-center gap-2 text-slate-700">
-                <CheckCircle2 className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-                <span>Kirim Portofolio Karya Guru Inovatif</span>
-              </div>
-            </div>
-
-            <button
-              onClick={() => handleQuickFill('GURU', 'guru', 'guru')}
-              className="w-full py-2.5 px-3 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-800 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
-            >
-              <span>Pilih Role Guru &amp; Masuk</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          {/* SISWA CARD */}
-          <div className="bg-white rounded-3xl p-6 border border-emerald-100 hover:border-emerald-300 shadow-xs hover:shadow-md transition-all space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                <Users className="w-3.5 h-3.5" />
-                ROLE: SISWA
-              </span>
-              <span className="text-[10px] font-bold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded">
-                Peserta Didik
-              </span>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-bold text-slate-900">Ruang Belajar Siswa</h3>
-              <p className="text-xs text-slate-500 mt-1">
-                Akses materi pelajaran SMK, tonton video praktikum lab, unduh LKPD dan simpan bookmark.
-              </p>
-            </div>
-
-            <div className="space-y-2 pt-2 border-t border-slate-100 text-xs">
-              <div className="flex items-center gap-2 text-slate-700">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                <span>Akses Modul Belajar Kelas X, XI, XII</span>
-              </div>
-              <div className="flex items-center gap-2 text-slate-700">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                <span>Tonton Praktikum &amp; Laboratorium Mandiri</span>
-              </div>
-              <div className="flex items-center gap-2 text-slate-700">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                <span>Simpan Bookmark Materi Favorit</span>
-              </div>
-            </div>
-
-            <button
-              onClick={() => handleQuickFill('SISWA', 'siswa', 'siswa')}
-              className="w-full py-2.5 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
-            >
-              <span>Pilih Role Siswa &amp; Masuk</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          {/* ADMIN CARD */}
-          <div className="bg-white rounded-3xl p-6 border border-slate-200 hover:border-slate-400 shadow-xs hover:shadow-md transition-all space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold bg-slate-900 text-amber-300 border border-slate-800">
-                <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-                ROLE: ADMIN
-              </span>
-              <span className="text-[10px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
-                Control Panel
-              </span>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-bold text-slate-900">Administrator Sekolah</h3>
-              <p className="text-xs text-slate-500 mt-1">
-                Verifikasi materi &amp; karya guru, kelola data master siswa/guru, dan sinkronisasi Google Sheets.
-              </p>
-            </div>
-
-            <div className="space-y-2 pt-2 border-t border-slate-100 text-xs">
-              <div className="flex items-center gap-2 text-slate-700">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                <span>Verifikasi &amp; Moderasi Konten Guru</span>
-              </div>
-              <div className="flex items-center gap-2 text-slate-700">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                <span>Manajemen Data Guru &amp; Kelas</span>
-              </div>
-              <div className="flex items-center gap-2 text-slate-700">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                <span>Integrasi Google Apps Script &amp; Sheets</span>
-              </div>
-            </div>
-
-            <button
-              onClick={() => handleQuickFill('ADMIN', 'admin', 'admin')}
-              className="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors"
-            >
-              <span>Pilih Role Admin &amp; Masuk</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-        </div>
-      </section>
-
-      {/* 4. SCHOOL FOOTPRINT CARD */}
-      <div className="bg-[#0F172A] text-white p-6 sm:p-8 rounded-3xl border border-slate-800 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="space-y-2">
-          <span className="text-[10px] font-bold text-sky-400 uppercase tracking-widest">
-            Alamat &amp; Kontak Resmi Sekolah
+        <div className="flex items-center gap-4">
+          <span className="flex items-center gap-1">
+            <Phone className="w-3 h-3 text-emerald-600" />
+            +62 812-3456-7890
           </span>
-          <h3 className="text-xl font-bold text-white">
-            {settings.school_name}
-          </h3>
-          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-300">
-            <span className="inline-flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5 text-rose-400" />
-              {settings.school_address}
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Phone className="w-3.5 h-3.5 text-emerald-400" />
-              +62 812-3456-7890
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Mail className="w-3.5 h-3.5 text-sky-400" />
-              info@smknegeri1bandar.sch.id
-            </span>
-          </div>
+          <span className="flex items-center gap-1">
+            <Mail className="w-3 h-3 text-sky-600" />
+            info@smknegeri1bandar.sch.id
+          </span>
         </div>
-
-        <button
-          onClick={() => onNavigate('home')}
-          className="bg-white hover:bg-sky-50 text-slate-900 font-bold px-5 py-3 rounded-xl text-xs flex items-center gap-2 shadow-xs transition-colors shrink-0"
-        >
-          <BookOpen className="w-4 h-4 text-sky-600" />
-          <span>Lihat Beranda Publik LMS</span>
-        </button>
       </div>
 
       {/* ======================================================== */}
-      {/* 5. DATABASE SETUP & INITIALIZATION MODAL */}
+      {/* 4. DATABASE INITIALIZATION MODAL */}
       {/* ======================================================== */}
       {isSetupModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-150">
           <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 max-w-lg w-full overflow-hidden animate-in zoom-in-95 duration-200">
             
             {/* Modal Header */}
@@ -551,13 +404,13 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
                 </div>
                 <div>
                   <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-950 text-amber-300 uppercase tracking-wider mb-1">
-                    Database Setup Engine
+                    Database Engine
                   </span>
                   <h2 className="text-xl font-extrabold text-slate-950">Inisialisasi Database</h2>
                 </div>
               </div>
               <p className="mt-2 text-xs text-slate-900 font-medium leading-relaxed">
-                Fitur ini akan membuat struktur sheet lengkap, mengisi data awal guru, siswa, kelas, modul materi, dan video pembelajaran untuk <strong>{settings.school_name}</strong>.
+                Membuat struktur Google Sheet / database lokal dan mengisi data akun guru, siswa, rombel kelas, serta materi untuk <strong>{settings.school_name}</strong>.
               </p>
             </div>
 
@@ -565,16 +418,16 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
             <div className="p-6 space-y-4">
               <div className="space-y-2">
                 <p className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  Daftar Sheet yang Diinisialisasi:
+                  Struktur Sheet yang Dikonfigurasi:
                 </p>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span><strong>1. tb_users</strong> (Akun &amp; Password)</span>
+                    <span><strong>1. tb_users</strong> (Akun &amp; Pass)</span>
                   </div>
                   <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span><strong>2. tb_guru</strong> (Data Pengajar)</span>
+                    <span><strong>2. tb_guru</strong> (Daftar Pengajar)</span>
                   </div>
                   <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -622,7 +475,7 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
                   {isInitializing ? (
                     <>
                       <RotateCw className="w-4 h-4 animate-spin" />
-                      <span>Sedang Menginisialisasi...</span>
+                      <span>Menginisialisasi...</span>
                     </>
                   ) : initSuccess ? (
                     <>
@@ -632,7 +485,7 @@ export const PortalLoginView: React.FC<PortalLoginViewProps> = ({
                   ) : (
                     <>
                       <Zap className="w-4 h-4 fill-amber-800 text-amber-800" />
-                      <span>Jalankan Inisialisasi Sekarang</span>
+                      <span>Jalankan Inisialisasi</span>
                     </>
                   )}
                 </button>

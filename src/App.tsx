@@ -34,7 +34,7 @@ import { GasCodeView } from './views/GasCodeView';
 
 export default function App() {
   // Navigation State
-  const [currentView, setCurrentView] = useState<AppView>('home');
+  const [currentView, setCurrentView] = useState<AppView>('portal-login');
   const [selectedGuru, setSelectedGuru] = useState<Guru | null>(null);
 
   // Authentication State
@@ -282,15 +282,20 @@ export default function App() {
   const handleLogin = (user: User) => {
     db.login(user);
     refreshAllData();
+    if (user.role === 'ADMIN') {
+      setCurrentView('admin-dashboard');
+    } else if (user.role === 'GURU') {
+      setCurrentView('guru-dashboard');
+    } else {
+      setCurrentView('materi');
+    }
     showToast(`Selamat datang, ${user.nama}!`);
   };
 
   const handleLogout = () => {
     db.logout();
     refreshAllData();
-    if (currentView === 'guru-dashboard' || currentView === 'admin-dashboard') {
-      setCurrentView('home');
-    }
+    setCurrentView('portal-login');
     showToast('Anda telah keluar dari akun', 'info');
   };
 
@@ -305,6 +310,27 @@ export default function App() {
       videoList.reduce((acc, v) => acc + (v.view || 0), 0) +
       karyaList.reduce((acc, k) => acc + (k.jumlah_view || 0), 0),
   };
+
+  // STANDALONE FULLSCREEN LANDING PAGE / LOGIN PORTAL
+  if (currentView === 'portal-login') {
+    return (
+      <div className="min-h-screen w-full font-sans antialiased selection:bg-blue-500 selection:text-white bg-slate-100">
+        <Toast toasts={toasts} onClose={removeToast} />
+        <PortalLoginView
+          settings={settings}
+          currentUser={currentUser}
+          onNavigate={handleNavigate}
+          onLogin={handleLogin}
+          onOpenAuthModal={() => setIsAuthOpen(true)}
+        />
+        <AuthModal
+          isOpen={isAuthOpen}
+          onClose={() => setIsAuthOpen(false)}
+          onLogin={handleLogin}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-100/60 text-slate-800 flex flex-col font-sans antialiased selection:bg-blue-500 selection:text-white">
@@ -341,16 +367,6 @@ export default function App() {
             onSelectGuru={handleSelectGuru}
             onOpenLogin={() => setIsAuthOpen(true)}
             stats={globalStats}
-          />
-        )}
-
-        {currentView === 'portal-login' && (
-          <PortalLoginView
-            settings={settings}
-            currentUser={currentUser}
-            onNavigate={handleNavigate}
-            onLogin={handleLogin}
-            onOpenAuthModal={() => setIsAuthOpen(true)}
           />
         )}
 

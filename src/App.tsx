@@ -17,6 +17,7 @@ import { ShareModal } from './components/ShareModal';
 import { AddMateriModal } from './views/Forms/AddMateriModal';
 import { AddVideoModal } from './views/Forms/AddVideoModal';
 import { AddKaryaModal } from './views/Forms/AddKaryaModal';
+import { EditGuruModal } from './views/Forms/EditGuruModal';
 
 // Views
 import { HomeView } from './views/HomeView';
@@ -70,6 +71,9 @@ export default function App() {
 
   const [isAddKaryaOpen, setIsAddKaryaOpen] = useState(false);
   const [editingKarya, setEditingKarya] = useState<KaryaGuru | null>(null);
+
+  const [isEditGuruOpen, setIsEditGuruOpen] = useState(false);
+  const [editingGuru, setEditingGuru] = useState<Guru | null>(null);
 
   // Toast Notification State
   const [toasts, setToasts] = useState<ToastNotification[]>([]);
@@ -233,11 +237,62 @@ export default function App() {
     showToast('Status karya unggulan diperbarui');
   };
 
-  // Guru & Kelas CRUD (Admin)
+  // Guru & Kelas CRUD (Admin & Teachers)
   const handleAddGuru = (guru: Guru) => {
     db.addGuru(guru);
     refreshAllData();
     showToast(`Guru ${guru.nama_guru} berhasil ditambahkan`);
+  };
+
+  const handleOpenEditGuru = (guru: Guru) => {
+    setEditingGuru(guru);
+    setIsEditGuruOpen(true);
+  };
+
+  const handleOpenMyProfileEdit = () => {
+    if (!currentUser) return;
+    const found = guruList.find(
+      g => g.email.toLowerCase() === currentUser.email?.toLowerCase() || 
+           g.id_guru === currentUser.id_user ||
+           g.nama_guru === currentUser.nama
+    );
+    if (found) {
+      setEditingGuru(found);
+    } else {
+      setEditingGuru({
+        id_guru: currentUser.id_user,
+        nama_guru: currentUser.nama,
+        email: currentUser.email,
+        nip: currentUser.nip || '',
+        gelar: '',
+        mata_pelajaran: currentUser.mata_pelajaran || '',
+        jurusan: currentUser.jurusan || 'Semua Jurusan',
+        kelas: 'X, XI, XII',
+        kontak: currentUser.email,
+        foto: currentUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300',
+        biografi: '',
+        keahlian: [],
+        status: 'AKTIF',
+      });
+    }
+    setIsEditGuruOpen(true);
+  };
+
+  const handleSaveGuruProfile = (updatedGuru: Guru) => {
+    db.updateGuru(updatedGuru);
+    refreshAllData();
+    if (selectedGuru && selectedGuru.id_guru === updatedGuru.id_guru) {
+      setSelectedGuru(updatedGuru);
+    }
+    setIsEditGuruOpen(false);
+    setEditingGuru(null);
+    showToast(`Profil & foto guru ${updatedGuru.nama_guru} berhasil diperbarui!`);
+  };
+
+  const handleDeleteGuru = (id: string) => {
+    db.deleteGuru(id);
+    refreshAllData();
+    showToast('Data guru telah dihapus dari sistem', 'info');
   };
 
   const handleAddKelas = (kelas: Kelas) => {
@@ -436,11 +491,13 @@ export default function App() {
             materiList={materiList}
             videoList={videoList}
             karyaList={karyaList}
+            currentUser={currentUser}
             onBack={() => handleNavigate('guru')}
             onPreviewMateri={handlePreviewMateri}
             onPlayVideo={handlePlayVideo}
             onPreviewKarya={handlePreviewKarya}
             onShareItem={handleShareItem}
+            onEditProfile={handleOpenEditGuru}
           />
         )}
 
@@ -480,6 +537,7 @@ export default function App() {
             onPreviewMateri={handlePreviewMateri}
             onPlayVideo={handlePlayVideo}
             onPreviewKarya={handlePreviewKarya}
+            onEditProfile={handleOpenMyProfileEdit}
           />
         )}
 
@@ -502,6 +560,8 @@ export default function App() {
             onDeleteVideo={handleDeleteVideo}
             onDeleteKarya={handleDeleteKarya}
             onAddGuru={handleAddGuru}
+            onEditGuru={handleOpenEditGuru}
+            onDeleteGuru={handleDeleteGuru}
             onAddKelas={handleAddKelas}
             onDeleteKelas={handleDeleteKelas}
             onPreviewMateri={handlePreviewMateri}
@@ -585,6 +645,17 @@ export default function App() {
         onSave={handleSaveKarya}
         currentUser={currentUser}
         editingKarya={editingKarya}
+      />
+
+      <EditGuruModal
+        isOpen={isEditGuruOpen}
+        onClose={() => {
+          setIsEditGuruOpen(false);
+          setEditingGuru(null);
+        }}
+        guru={editingGuru}
+        currentUser={currentUser}
+        onSave={handleSaveGuruProfile}
       />
 
     </div>

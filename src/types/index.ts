@@ -13,6 +13,8 @@ export interface User {
   mata_pelajaran: string;
   sekolah: string;
   foto: string;
+  avatar?: string;
+  jurusan?: string;
   status: UserStatus;
   tanggal_daftar: string;
   last_login: string;
@@ -72,6 +74,9 @@ export interface Materi {
   sumber: 'GOOGLE DRIVE' | 'LINK' | 'UPLOAD FILE' | 'YOUTUBE';
   url: string;
   file_id?: string;
+  file_name?: string;
+  file_size?: string;
+  file_data?: string;
   thumbnail?: string;
   tanggal_upload: string;
   status: StatusKonten;
@@ -122,6 +127,9 @@ export interface KaryaGuru {
   tahun: string;
   url: string;
   file_id?: string;
+  file_name?: string;
+  file_size?: string;
+  file_data?: string;
   thumbnail: string;
   tanggal_upload: string;
   status: StatusKonten;

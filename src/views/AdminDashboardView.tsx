@@ -27,6 +27,8 @@ interface AdminDashboardViewProps {
   onDeleteVideo: (id: string) => void;
   onDeleteKarya: (id: string) => void;
   onAddGuru: (guru: Guru) => void;
+  onEditGuru?: (guru: Guru) => void;
+  onDeleteGuru?: (id: string) => void;
   onAddKelas: (kelas: Kelas) => void;
   onDeleteKelas: (id: string) => void;
   onPreviewMateri: (materi: Materi) => void;
@@ -54,6 +56,8 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
   onDeleteVideo,
   onDeleteKarya,
   onAddGuru,
+  onEditGuru,
+  onDeleteGuru,
   onAddKelas,
   onDeleteKelas,
   onPreviewMateri,
@@ -443,13 +447,14 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                   <th className="px-4 py-3">Email</th>
                   <th className="px-4 py-3">Mata Pelajaran</th>
                   <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3 text-right">Aksi &amp; Foto</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium">
                 {guruList.map((g) => (
                   <tr key={g.id_guru} className="hover:bg-slate-50">
                     <td className="px-4 py-3 flex items-center gap-2.5">
-                      <img src={g.foto} alt="" className="w-8 h-8 rounded-full object-cover" />
+                      <img src={g.foto} alt="" className="w-8 h-8 rounded-full object-cover ring-1 ring-slate-200" />
                       <span className="font-bold text-slate-900">{g.nama_guru}</span>
                     </td>
                     <td className="px-4 py-3 font-mono text-slate-500">{g.nip}</td>
@@ -463,6 +468,35 @@ export const AdminDashboardView: React.FC<AdminDashboardViewProps> = ({
                       <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold text-[10px]">
                         {g.status}
                       </span>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        {onEditGuru && (
+                          <button
+                            type="button"
+                            onClick={() => onEditGuru(g)}
+                            className="px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 text-xs font-bold flex items-center gap-1 transition-colors"
+                            title="Edit profil & ganti foto guru"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                            <span>Edit Foto/Profil</span>
+                          </button>
+                        )}
+                        {onDeleteGuru && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (window.confirm(`Hapus guru ${g.nama_guru} dari sistem?`)) {
+                                onDeleteGuru(g.id_guru);
+                              }
+                            }}
+                            className="p-1 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                            title="Hapus data guru"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Award, Check, HardDrive, Upload, Sparkles, FileText } from 'lucide-react';
+import { X, Award, Check, HardDrive, Upload, Sparkles, FileText, Link as LinkIcon, AlertCircle } from 'lucide-react';
 import { KaryaGuru, KategoriKarya, User } from '../../types';
 import { extractDriveFileId } from '../../services/database';
 
@@ -23,9 +23,14 @@ export const AddKaryaModal: React.FC<AddKaryaModalProps> = ({
   const [kategori, setKategori] = useState<KategoriKarya>('Modul Ajar');
   const [mataPelajaran, setMataPelajaran] = useState('');
   const [tahun, setTahun] = useState('2025/2026');
+  const [sumber, setSumber] = useState<'UPLOAD FILE' | 'GOOGLE DRIVE' | 'LINK'>('UPLOAD FILE');
   const [url, setUrl] = useState('');
   const [thumbnail, setThumbnail] = useState('');
   const [featured, setFeatured] = useState(false);
+  const [uploadFileName, setUploadFileName] = useState('');
+  const [uploadFileSize, setUploadFileSize] = useState('');
+  const [uploadFileData, setUploadFileData] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     if (editingKarya) {
@@ -37,25 +42,72 @@ export const AddKaryaModal: React.FC<AddKaryaModalProps> = ({
       setUrl(editingKarya.url);
       setThumbnail(editingKarya.thumbnail || '');
       setFeatured(editingKarya.featured || false);
+      setUploadFileName(editingKarya.file_name || '');
+      setUploadFileSize(editingKarya.file_size || '');
+      setUploadFileData(editingKarya.file_data || editingKarya.url || '');
+      if (editingKarya.url?.startsWith('data:') || editingKarya.file_data) {
+        setSumber('UPLOAD FILE');
+      } else if (editingKarya.url?.includes('drive.google.com')) {
+        setSumber('GOOGLE DRIVE');
+      } else {
+        setSumber('LINK');
+      }
     } else {
       setJudulKarya('');
       setDeskripsi('');
       setKategori('Modul Ajar');
       setMataPelajaran(currentUser?.mata_pelajaran || 'Informatika & RPL');
       setTahun('2025/2026');
+      setSumber('UPLOAD FILE');
       setUrl('');
       setThumbnail('');
       setFeatured(false);
+      setUploadFileName('');
+      setUploadFileSize('');
+      setUploadFileData('');
     }
   }, [editingKarya, currentUser, isOpen]);
 
   if (!isOpen) return null;
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const fileName = file.name;
+    const fileSizeFormatted = file.size > 1024 * 1024 
+      ? `${(file.size / (1024 * 1024)).toFixed(1)} MB` 
+      : `${(file.size / 1024).toFixed(0)} KB`;
+    
+    setUploadFileName(fileName);
+    setUploadFileSize(fileSizeFormatted);
+
+    // Auto-fill title if empty
+    if (!judulKarya.trim()) {
+      const cleanTitle = fileName.replace(/\.[^/.]+$/, "").replace(/[_-]/g, " ");
+      setJudulKarya(cleanTitle.charAt(0).toUpperCase() + cleanTitle.slice(1));
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result as string;
+      setUploadFileData(result);
+      setUrl(result);
+      setIsUploading(false);
+    };
+    reader.onerror = () => {
+      setIsUploading(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!judulKarya.trim() || !url.trim()) return;
+    const finalUrl = url.trim() || uploadFileData;
+    if (!judulKarya.trim() || !finalUrl) return;
 
-    const fileId = extractDriveFileId(url) || undefined;
+    const fileId = extractDriveFileId(finalUrl) || undefined;
     const defaultThumb = 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=500';
 
     const isAdmin = currentUser?.role === 'ADMIN';
@@ -69,8 +121,11 @@ export const AddKaryaModal: React.FC<AddKaryaModalProps> = ({
       kategori,
       mata_pelajaran: mataPelajaran.trim(),
       tahun,
-      url: url.trim(),
+      url: finalUrl,
       file_id: fileId,
+      file_name: uploadFileName || undefined,
+      file_size: uploadFileSize || undefined,
+      file_data: uploadFileData || undefined,
       thumbnail: thumbnail.trim() || defaultThumb,
       tanggal_upload: editingKarya ? editingKarya.tanggal_upload : new Date().toISOString().slice(0, 10),
       status: editingKarya ? editingKarya.status : (isAdmin ? 'DISETUJUI' : 'MENUNGGU VERIFIKASI'),
@@ -194,29 +249,157 @@ export const AddKaryaModal: React.FC<AddKaryaModalProps> = ({
             </div>
           </div>
 
+          {/* Sumber Selection */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">
-              Link Berkas Google Drive / URL Portofolio Karya *
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">
+              Pilihan Sumber Berkas Karya *
             </label>
-            <div className="relative">
-              <HardDrive className="w-4 h-4 text-emerald-600 absolute left-3.5 top-3.5" />
-              <input
-                type="url"
-                required
-                placeholder="https://drive.google.com/file/d/1G_01234.../view"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-              />
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                id="btn-karya-source-upload"
+                onClick={() => setSumber('UPLOAD FILE')}
+                className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 border transition-all ${
+                  sumber === 'UPLOAD FILE'
+                    ? 'bg-amber-50 border-amber-500 text-amber-800 shadow-2xs'
+                    : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                <Upload className="w-3.5 h-3.5 text-amber-600" />
+                Upload Dokumen
+              </button>
+
+              <button
+                type="button"
+                id="btn-karya-source-drive"
+                onClick={() => setSumber('GOOGLE DRIVE')}
+                className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 border transition-all ${
+                  sumber === 'GOOGLE DRIVE'
+                    ? 'bg-emerald-50 border-emerald-500 text-emerald-800 shadow-2xs'
+                    : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                <HardDrive className="w-3.5 h-3.5 text-emerald-600" />
+                Google Drive
+              </button>
+
+              <button
+                type="button"
+                id="btn-karya-source-link"
+                onClick={() => setSumber('LINK')}
+                className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 border transition-all ${
+                  sumber === 'LINK'
+                    ? 'bg-indigo-50 border-indigo-500 text-indigo-800 shadow-2xs'
+                    : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                <LinkIcon className="w-3.5 h-3.5 text-indigo-600" />
+                Tautan / URL
+              </button>
             </div>
           </div>
+
+          {/* Dynamic source input */}
+          {sumber === 'UPLOAD FILE' ? (
+            <div className="p-4 rounded-2xl border-2 border-dashed border-amber-300 bg-amber-50/40 text-center space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mx-auto shadow-2xs">
+                <Upload className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-slate-800">
+                  Pilih File Dokumen / Modul dari Komputer
+                </p>
+                <p className="text-[11px] text-slate-500 max-w-sm mx-auto mt-0.5">
+                  Mendukung PDF, Word, PowerPoint, Excel, Gambar, dan materi digital lainnya.
+                </p>
+              </div>
+
+              <div className="flex justify-center">
+                <input
+                  type="file"
+                  id="karya-file-upload-input"
+                  accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.png,.jpg,.jpeg"
+                  onChange={handleFileUpload}
+                  className="text-xs text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-amber-600 file:text-white hover:file:bg-amber-700 cursor-pointer"
+                />
+              </div>
+
+              {isUploading && (
+                <div className="text-xs font-semibold text-amber-700 animate-pulse flex items-center justify-center gap-1.5 py-1">
+                  <div className="w-3.5 h-3.5 border-2 border-amber-600 border-t-transparent rounded-full animate-spin"></div>
+                  Memproses berkas...
+                </div>
+              )}
+
+              {uploadFileName && !isUploading && (
+                <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-left flex items-center justify-between">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-black text-xs shrink-0">
+                      <FileText className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-emerald-950 truncate">
+                        {uploadFileName}
+                      </p>
+                      <p className="text-[10px] text-emerald-700 font-medium">
+                        Ukuran: {uploadFileSize || 'Siap'} • Status: Siap Dipratinjau
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-200/80 text-emerald-800 shrink-0">
+                    ✓ Terunggah
+                  </span>
+                </div>
+              )}
+            </div>
+          ) : sumber === 'GOOGLE DRIVE' ? (
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Link Berkas Google Drive *
+              </label>
+              <div className="relative">
+                <HardDrive className="w-4 h-4 text-emerald-600 absolute left-3.5 top-3.5" />
+                <input
+                  type="url"
+                  required
+                  placeholder="https://drive.google.com/file/d/1G_01234.../view?usp=sharing"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+              <div className="p-3 bg-amber-50 rounded-xl border border-amber-200/80 text-left flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div className="text-[11px] text-amber-900 leading-relaxed">
+                  <strong>Tips Akses:</strong> Atur status sharing Google Drive ke <span className="underline font-bold">"Siapa saja yang memiliki link (Pelihat)"</span> agar karya bisa langsung dibuka pembaca.
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Tautan Sumber Portofolio / Web Karya *
+              </label>
+              <div className="relative">
+                <LinkIcon className="w-4 h-4 text-indigo-600 absolute left-3.5 top-3.5" />
+                <input
+                  type="url"
+                  required
+                  placeholder="https://portofolio-guru.id/karya-inovasi"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+            </div>
+          )}
 
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
               Deskripsi Lengkap / Abstrak Karya
             </label>
             <textarea
-              rows={4}
+              rows={3}
               placeholder="Jelaskan latar belakang, tujuan pembelajaran, metode inovasi, dan dampak karya ini terhadap hasil belajar peserta didik..."
               value={deskripsi}
               onChange={(e) => setDeskripsi(e.target.value)}
@@ -275,3 +458,4 @@ export const AddKaryaModal: React.FC<AddKaryaModalProps> = ({
     </div>
   );
 };
+

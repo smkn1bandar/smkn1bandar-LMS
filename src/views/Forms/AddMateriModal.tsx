@@ -31,6 +31,9 @@ export const AddMateriModal: React.FC<AddMateriModalProps> = ({
   const [url, setUrl] = useState('');
   const [thumbnail, setThumbnail] = useState('');
   const [uploadFileName, setUploadFileName] = useState('');
+  const [uploadFileSize, setUploadFileSize] = useState('');
+  const [uploadFileType, setUploadFileType] = useState('');
+  const [uploadFileData, setUploadFileData] = useState('');
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
@@ -45,6 +48,9 @@ export const AddMateriModal: React.FC<AddMateriModalProps> = ({
       setSumber(editingMateri.sumber === 'YOUTUBE' ? 'LINK' : editingMateri.sumber);
       setUrl(editingMateri.url);
       setThumbnail(editingMateri.thumbnail || '');
+      setUploadFileName(editingMateri.file_name || '');
+      setUploadFileSize(editingMateri.file_size || '');
+      setUploadFileData(editingMateri.file_data || editingMateri.url || '');
     } else {
       setJudul('');
       setDeskripsi('');
@@ -53,35 +59,70 @@ export const AddMateriModal: React.FC<AddMateriModalProps> = ({
       setKelas(kelasList[0]?.nama_kelas || 'X RPL 1');
       setTopik('');
       setJenisMateri('PDF');
-      setSumber('GOOGLE DRIVE');
+      setSumber('UPLOAD FILE');
       setUrl('');
       setThumbnail('');
       setUploadFileName('');
+      setUploadFileSize('');
+      setUploadFileType('');
+      setUploadFileData('');
     }
   }, [editingMateri, currentUser, kelasList, isOpen]);
 
   if (!isOpen) return null;
 
-  const handleFakeFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleRealFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setIsUploading(true);
-      setUploadFileName(file.name);
-      // Simulate Google Drive upload
-      setTimeout(() => {
-        const fakeDriveId = `1DriveUpload_${Date.now().toString().slice(-8)}`;
-        setUrl(`https://drive.google.com/file/d/${fakeDriveId}/view`);
-        setIsUploading(false);
-      }, 800);
+    if (!file) return;
+
+    setIsUploading(true);
+    const fileName = file.name;
+    const fileSizeFormatted = file.size > 1024 * 1024 
+      ? `${(file.size / (1024 * 1024)).toFixed(1)} MB` 
+      : `${(file.size / 1024).toFixed(0)} KB`;
+    
+    setUploadFileName(fileName);
+    setUploadFileSize(fileSizeFormatted);
+    setUploadFileType(file.type);
+
+    // Auto-detect format
+    const lower = fileName.toLowerCase();
+    if (lower.endsWith('.pdf')) setJenisMateri('PDF');
+    else if (lower.endsWith('.doc') || lower.endsWith('.docx')) setJenisMateri('DOC/DOCX');
+    else if (lower.endsWith('.ppt') || lower.endsWith('.pptx')) setJenisMateri('PPT/PPTX');
+    else if (lower.endsWith('.xls') || lower.endsWith('.xlsx')) setJenisMateri('XLS/XLSX');
+    else if (lower.endsWith('.png') || lower.endsWith('.jpg') || lower.endsWith('.jpeg')) setJenisMateri('MODUL');
+
+    // Auto-fill title if empty
+    if (!judul.trim()) {
+      const cleanTitle = fileName.replace(/\.[^/.]+$/, "").replace(/[_-]/g, " ");
+      setJudul(cleanTitle.charAt(0).toUpperCase() + cleanTitle.slice(1));
     }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result as string;
+      setUploadFileData(result);
+      setUrl(result);
+      setIsUploading(false);
+    };
+    reader.onerror = () => {
+      setIsUploading(false);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!judul.trim() || !url.trim()) return;
+    const finalUrl = url.trim() || uploadFileData;
+    if (!judul.trim() || !finalUrl) return;
 
-    const fileId = extractDriveFileId(url) || undefined;
-    const defaultThumb = 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=500';
+    const fileId = extractDriveFileId(finalUrl) || undefined;
+    const defaultThumb = jenisMateri === 'PDF'
+      ? 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500'
+      : jenisMateri === 'PPT/PPTX'
+      ? 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=500'
+      : 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=500';
 
     const payload: Materi = {
       id_materi: editingMateri ? editingMateri.id_materi : `MAT-${Date.now().toString().slice(-6)}`,
@@ -95,8 +136,11 @@ export const AddMateriModal: React.FC<AddMateriModalProps> = ({
       topik: topik.trim() || 'Pembelajaran Reguler',
       jenis_materi: jenisMateri,
       sumber,
-      url: url.trim(),
+      url: finalUrl,
       file_id: fileId,
+      file_name: uploadFileName || undefined,
+      file_size: uploadFileSize || undefined,
+      file_data: uploadFileData || undefined,
       thumbnail: thumbnail.trim() || defaultThumb,
       tanggal_upload: editingMateri ? editingMateri.tanggal_upload : new Date().toISOString().slice(0, 10),
       status: editingMateri ? editingMateri.status : 'DISETUJUI',
@@ -285,42 +329,93 @@ export const AddMateriModal: React.FC<AddMateriModalProps> = ({
 
           {/* Dynamic source input */}
           {sumber === 'UPLOAD FILE' ? (
-            <div className="p-4 rounded-2xl border border-dashed border-blue-300 bg-blue-50/40 text-center">
-              <Upload className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-              <p className="text-xs font-bold text-slate-800 mb-1">
-                Pilih File Dokumen Pembelajaran
-              </p>
-              <p className="text-[11px] text-slate-500 mb-3">
-                PDF, DOCX, PPTX, XLSX (Otomatis disimpan ke Master Folder Google Drive)
-              </p>
-              <input
-                type="file"
-                id="file-upload-input"
-                onChange={handleFakeFileUpload}
-                className="text-xs text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer"
-              />
+            <div className="p-4 rounded-2xl border-2 border-dashed border-blue-300 bg-blue-50/50 text-center space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mx-auto shadow-2xs">
+                <Upload className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-slate-800">
+                  Upload Dokumen dari Laptop / Komputer
+                </p>
+                <p className="text-[11px] text-slate-500 max-w-sm mx-auto mt-0.5">
+                  Mendukung PDF, Word (DOC/DOCX), PowerPoint (PPT/PPTX), Excel (XLS/XLSX), serta Gambar. Dokumen akan dapat dipratinjau langsung di aplikasi.
+                </p>
+              </div>
+
+              <div className="flex justify-center">
+                <input
+                  type="file"
+                  id="file-upload-input"
+                  accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.png,.jpg,.jpeg"
+                  onChange={handleRealFileUpload}
+                  className="text-xs text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer"
+                />
+              </div>
+
               {isUploading && (
-                <div className="mt-2 text-xs font-semibold text-blue-700 animate-pulse">
-                  Mengunggah ke Google Drive...
+                <div className="text-xs font-semibold text-blue-700 animate-pulse flex items-center justify-center gap-1.5 py-1">
+                  <div className="w-3.5 h-3.5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                  Membaca dan memproses berkas dokumen...
                 </div>
               )}
+
               {uploadFileName && !isUploading && (
-                <div className="mt-2 text-xs font-medium text-emerald-700 flex items-center justify-center gap-1">
-                  <Check className="w-3.5 h-3.5" /> File siap: {uploadFileName}
+                <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-left flex items-center justify-between">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-black text-xs shrink-0">
+                      {jenisMateri}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-emerald-950 truncate">
+                        {uploadFileName}
+                      </p>
+                      <p className="text-[10px] text-emerald-700 font-medium">
+                        Ukuran: {uploadFileSize || 'Siap'} • Status: Siap Dipratinjau
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-200/80 text-emerald-800 shrink-0">
+                    ✓ Terunggah
+                  </span>
                 </div>
               )}
+            </div>
+          ) : sumber === 'GOOGLE DRIVE' ? (
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Tautan / Link Google Drive Berkas *
+              </label>
+              <div className="relative">
+                <HardDrive className="w-4 h-4 text-emerald-600 absolute left-3.5 top-3.5" />
+                <input
+                  type="url"
+                  required
+                  placeholder="https://drive.google.com/file/d/1BxiMVs0XRA5.../view?usp=sharing"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Tips Google Drive Sharing */}
+              <div className="p-3 bg-amber-50 rounded-xl border border-amber-200/80 text-left flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div className="text-[11px] text-amber-900 leading-relaxed">
+                  <strong>Penting agar Pratinjau Tampil:</strong> Pastikan pengaturan akses di Google Drive disetel ke <span className="underline font-bold">"Siapa saja yang memiliki link (Pelihat/Viewer)"</span>, bukan "Dibatasi".
+                </div>
+              </div>
             </div>
           ) : (
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                Tautan / Link Google Drive atau Web *
+                Tautan Sumber Eksternal / URL Web *
               </label>
               <div className="relative">
-                <HardDrive className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                <LinkIcon className="w-4 h-4 text-indigo-600 absolute left-3.5 top-3.5" />
                 <input
                   type="url"
                   required
-                  placeholder="https://drive.google.com/file/d/1BxiMVs0.../view"
+                  placeholder="https://example.com/modul-pembelajaran.pdf"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"

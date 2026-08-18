@@ -21,6 +21,10 @@ export const PanduanView: React.FC = () => {
       a: 'Aplikasi Google Apps Script ini telah dikonfigurasi dengan mode X-Frame-Options: ALLOWALL. Anda cukup menyalin kode iframe dari menu "Embed Blogger", kemudian buat Postingan Baru di Blogger, ganti mode editor ke "Tampilan HTML", dan tempelkan kodenya.',
     },
     {
+      q: 'Bagaimana cara memasukkan, mengganti, dan menghapus foto profil guru?',
+      a: 'Ada 2 cara mudah: 1) Melalui Aplikasi: Masuk sebagai Guru atau Admin > Klik foto profil atau tombol "Edit Profil & Foto" > Pilih "Upload dari Komputer" untuk memilih foto JPG/PNG baru, atau masukkan Link URL Foto. Untuk menghapus foto profil, klik tombol "Hapus / Reset Foto (Gunakan Inisial)". 2) Melalui Spreadsheet: Buka tab Sheet "Data_Guru" > Cari kolom "foto" > Masukkan/ganti URL gambar foto guru tersebut, atau kosongkan sel jika ingin menghapus foto.',
+    },
+    {
       q: 'Bagaimana sistem moderasi karya guru bekerja?',
       a: 'Setiap guru dapat mengunggah Modul Ajar, Best Practice, atau Media Interaktif. Karya yang diunggah akan masuk status "Menunggu Verifikasi". Administrator sekolah dapat meninjau, menyetujui, memberi catatan revisi, atau menjadikannya "Karya Unggulan" di halaman Beranda.',
     },

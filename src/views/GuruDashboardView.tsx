@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   User, BookOpen, Video, Award, Plus, Trash2, Edit3, 
-  ExternalLink, Eye, HardDrive, Youtube, Sparkles, CheckCircle2, Clock 
+  ExternalLink, Eye, HardDrive, Youtube, Sparkles, CheckCircle2, Clock, Camera, Settings
 } from 'lucide-react';
 import { Materi, YoutubeVideo, KaryaGuru, User as UserType } from '../types';
 
@@ -22,6 +22,7 @@ interface GuruDashboardViewProps {
   onPreviewMateri: (materi: Materi) => void;
   onPlayVideo: (video: YoutubeVideo) => void;
   onPreviewKarya: (karya: KaryaGuru) => void;
+  onEditProfile?: () => void;
 }
 
 export const GuruDashboardView: React.FC<GuruDashboardViewProps> = ({
@@ -41,6 +42,7 @@ export const GuruDashboardView: React.FC<GuruDashboardViewProps> = ({
   onPreviewMateri,
   onPlayVideo,
   onPreviewKarya,
+  onEditProfile,
 }) => {
   const [activeTab, setActiveTab] = useState<'materi' | 'video' | 'karya'>('materi');
 
@@ -59,11 +61,24 @@ export const GuruDashboardView: React.FC<GuruDashboardViewProps> = ({
       {/* Welcome Banner - Bento Styled */}
       <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
-          <img
-            src={currentUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200'}
-            alt={currentUser.nama}
-            className="w-14 h-14 rounded-xl object-cover ring-2 ring-sky-500/20 shadow-2xs"
-          />
+          <div className="relative group shrink-0">
+            <img
+              src={currentUser.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200'}
+              alt={currentUser.nama}
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover ring-2 ring-sky-500/20 shadow-sm"
+            />
+            {onEditProfile && (
+              <button
+                type="button"
+                onClick={onEditProfile}
+                title="Ganti Foto Profil Guru"
+                className="absolute inset-0 bg-black/40 hover:bg-black/60 rounded-2xl flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <Camera className="w-5 h-5" />
+                <span className="text-[9px] font-bold mt-0.5">Ganti Foto</span>
+              </button>
+            )}
+          </div>
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="w-2 h-2 rounded-full bg-sky-500"></span>
@@ -77,11 +92,32 @@ export const GuruDashboardView: React.FC<GuruDashboardViewProps> = ({
             <p className="text-xs text-slate-500 font-medium">
               Mata Pelajaran: {currentUser.mata_pelajaran || 'Informatika'} &bull; NIP: {currentUser.nip || '-'}
             </p>
+            {onEditProfile && (
+              <button
+                type="button"
+                id="btn-edit-guru-profile-banner"
+                onClick={onEditProfile}
+                className="mt-2 text-xs font-bold text-sky-600 hover:text-sky-800 flex items-center gap-1.5 transition-colors"
+              >
+                <Camera className="w-3.5 h-3.5" />
+                <span>Ganti / Kelola Foto Profil Guru</span>
+              </button>
+            )}
           </div>
         </div>
 
         {/* Quick Add Action Buttons */}
         <div className="flex flex-wrap items-center gap-2">
+          {onEditProfile && (
+            <button
+              id="btn-dash-edit-profile"
+              onClick={onEditProfile}
+              className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-slate-200 transition-all flex items-center gap-1.5"
+            >
+              <Settings className="w-3.5 h-3.5 text-slate-600" />
+              Edit Profil &amp; Foto
+            </button>
+          )}
           <button
             id="btn-dash-add-materi"
             onClick={onOpenAddMateri}

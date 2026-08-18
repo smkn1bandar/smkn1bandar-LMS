@@ -1000,15 +1000,48 @@ class DatabaseService {
 
   public saveTeacher(guru: Guru, actorEmail = 'admin@smk.sch.id', actorName = 'Administrator', actorRole = 'ADMIN'): void {
     const teachers = this.getTeachers();
-    const index = teachers.findIndex(g => g.id_guru === guru.id_guru);
+    const index = teachers.findIndex(g => g.id_guru === guru.id_guru || (g.email && g.email.toLowerCase() === guru.email?.toLowerCase()));
     if (index >= 0) {
       teachers[index] = guru;
-      this.logActivity(actorEmail, actorName, actorRole, 'Update Data Guru', `Memperbarui profil guru ${guru.nama_guru}.`);
+      this.logActivity(actorEmail, actorName, actorRole, 'Update Data Guru', `Memperbarui profil & foto guru ${guru.nama_guru}.`);
     } else {
       teachers.unshift(guru);
       this.logActivity(actorEmail, actorName, actorRole, 'Tambah Guru', `Menambahkan data guru baru: ${guru.nama_guru}.`);
     }
     localStorage.setItem(this.guruKey, JSON.stringify(teachers));
+
+    // Sync with User Accounts
+    const users = this.getUsers();
+    const userIndex = users.findIndex(u => u.email.toLowerCase() === guru.email.toLowerCase() || u.id_user === guru.id_guru);
+    if (userIndex >= 0) {
+      users[userIndex].nama = guru.nama_guru;
+      users[userIndex].foto = guru.foto;
+      users[userIndex].avatar = guru.foto;
+      users[userIndex].nip = guru.nip;
+      users[userIndex].mata_pelajaran = guru.mata_pelajaran;
+      localStorage.setItem(this.usersKey, JSON.stringify(users));
+    }
+
+    // Sync active logged-in user if it is this teacher
+    const active = this.getCurrentUser();
+    if (active && (active.email.toLowerCase() === guru.email.toLowerCase() || active.id_user === guru.id_guru)) {
+      active.nama = guru.nama_guru;
+      active.foto = guru.foto;
+      active.avatar = guru.foto;
+      active.nip = guru.nip;
+      active.mata_pelajaran = guru.mata_pelajaran;
+      localStorage.setItem('digital_lms_active_user', JSON.stringify(active));
+    }
+  }
+
+  public deleteTeacher(id_guru: string, actorEmail = 'admin@smk.sch.id', actorName = 'Administrator'): void {
+    const teachers = this.getTeachers();
+    const target = teachers.find(g => g.id_guru === id_guru);
+    const filtered = teachers.filter(g => g.id_guru !== id_guru);
+    localStorage.setItem(this.guruKey, JSON.stringify(filtered));
+    if (target) {
+      this.logActivity(actorEmail, actorName, 'ADMIN', 'Hapus Guru', `Menghapus data guru ${target.nama_guru}.`);
+    }
   }
 
   // KELAS
@@ -1387,6 +1420,16 @@ class DatabaseService {
   public addGuru(guru: Guru): void {
     const admin = this.getCurrentUser();
     this.saveTeacher(guru, admin?.email || 'admin@smk.sch.id', admin?.nama || 'Administrator', 'ADMIN');
+  }
+
+  public updateGuru(guru: Guru): void {
+    const active = this.getCurrentUser();
+    this.saveTeacher(guru, active?.email || 'system', active?.nama || 'User', active?.role || 'GURU');
+  }
+
+  public deleteGuru(id_guru: string): void {
+    const admin = this.getCurrentUser();
+    this.deleteTeacher(id_guru, admin?.email || 'admin@smk.sch.id', admin?.nama || 'Administrator');
   }
 
   public addKelas(kelas: Kelas): void {

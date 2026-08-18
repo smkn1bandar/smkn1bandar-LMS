@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { 
   ArrowLeft, Mail, Phone, BookOpen, Video, Award, 
-  School, Sparkles, User, ExternalLink, Calendar 
+  School, Sparkles, User, ExternalLink, Calendar, Camera, Edit3 
 } from 'lucide-react';
-import { Guru, Materi, YoutubeVideo, KaryaGuru } from '../types';
+import { Guru, Materi, YoutubeVideo, KaryaGuru, User as UserType } from '../types';
 import { MateriCard } from '../components/MateriCard';
 import { VideoCard } from '../components/VideoCard';
 import { KaryaCard } from '../components/KaryaCard';
@@ -13,11 +13,13 @@ interface GuruProfileViewProps {
   materiList: Materi[];
   videoList: YoutubeVideo[];
   karyaList: KaryaGuru[];
+  currentUser?: UserType | null;
   onBack: () => void;
   onPreviewMateri: (materi: Materi) => void;
   onPlayVideo: (video: YoutubeVideo) => void;
   onPreviewKarya: (karya: KaryaGuru) => void;
   onShareItem: (item: any) => void;
+  onEditProfile?: (guru: Guru) => void;
 }
 
 export const GuruProfileView: React.FC<GuruProfileViewProps> = ({
@@ -25,11 +27,13 @@ export const GuruProfileView: React.FC<GuruProfileViewProps> = ({
   materiList,
   videoList,
   karyaList,
+  currentUser,
   onBack,
   onPreviewMateri,
   onPlayVideo,
   onPreviewKarya,
   onShareItem,
+  onEditProfile,
 }) => {
   const [activeTab, setActiveTab] = useState<'materi' | 'video' | 'karya'>('materi');
 
@@ -37,26 +41,59 @@ export const GuruProfileView: React.FC<GuruProfileViewProps> = ({
   const teacherVideo = videoList.filter(v => v.id_guru === guru.id_guru || v.nama_guru === guru.nama_guru);
   const teacherKarya = karyaList.filter(k => k.id_guru === guru.id_guru || k.nama_guru === guru.nama_guru);
 
+  const canEdit = currentUser && (
+    currentUser.role === 'ADMIN' || 
+    currentUser.email?.toLowerCase() === guru.email?.toLowerCase() ||
+    currentUser.nama === guru.nama_guru ||
+    currentUser.id_user === guru.id_guru
+  );
+
   return (
     <div id="guru-profile-view-container" className="space-y-8 pb-16">
       
-      {/* Back Button */}
-      <button
-        id="btn-back-from-profile"
-        onClick={onBack}
-        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-xs shadow-2xs transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Kembali ke Halaman Sebelumnya
-      </button>
+      {/* Top Bar with Back and optional Edit button */}
+      <div className="flex items-center justify-between gap-4">
+        <button
+          id="btn-back-from-profile"
+          onClick={onBack}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-xs shadow-2xs transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Kembali ke Halaman Sebelumnya
+        </button>
+
+        {canEdit && onEditProfile && (
+          <button
+            id="btn-edit-guru-from-profile"
+            onClick={() => onEditProfile(guru)}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-xs transition-all"
+          >
+            <Camera className="w-4 h-4" />
+            Edit Foto &amp; Profil Guru
+          </button>
+        )}
+      </div>
 
       {/* Profile Card Banner */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm flex flex-col md:flex-row items-start md:items-center gap-6">
-        <img
-          src={guru.foto || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300'}
-          alt={guru.nama_guru}
-          className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl object-cover ring-4 ring-blue-50 shadow-md shrink-0"
-        />
+        <div className="relative group shrink-0">
+          <img
+            src={guru.foto || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300'}
+            alt={guru.nama_guru}
+            className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl object-cover ring-4 ring-blue-50 shadow-md shrink-0"
+          />
+          {canEdit && onEditProfile && (
+            <button
+              type="button"
+              onClick={() => onEditProfile(guru)}
+              title="Ganti Foto Profil Guru"
+              className="absolute inset-0 bg-black/40 hover:bg-black/60 rounded-3xl flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <Camera className="w-6 h-6" />
+              <span className="text-[10px] font-bold mt-1">Ganti Foto</span>
+            </button>
+          )}
+        </div>
 
         <div className="flex-1 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
